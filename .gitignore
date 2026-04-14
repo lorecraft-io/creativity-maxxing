@@ -1,0 +1,40 @@
+.claude-flow/
+.ruflo/
+.claude/
+.mcp.json
+CLAUDE.md
+.DS_Store
+
+# Obsidian vault index note — this repo is cloned inside the maintainer's
+# 2ndBrain vault, which auto-creates a folder-index note named after the
+# containing folder. Not part of the repo.
+creativity-maxxing.md
+
+# Environment / secrets
+.env
+.env.*
+.env.local
+.env.production
+.env.development
+
+# Private keys and certificates
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+credentials.json
+
+# Node (defensive — step scripts may install deps)
+node_modules/
+
+# Media scratch (Remotion renders, whisper audio cache, yt-dlp downloads)
+out/
+renders/
+*.mp4
+*.mov
+*.webm
+*.mp3
+*.wav
+*.m4a
+whisper-cache/
