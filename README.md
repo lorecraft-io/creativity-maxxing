@@ -7,7 +7,9 @@ transcription pipeline for audio and social-media clips.
 
 If cli-maxxing is the terminal, creativity-maxxing is the canvas.
 
-> **Requires [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing)
+> **Prereq: cli-maxxing** — install [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing) first.
+>
+> **Requires `cli-maxxing`
 > installed first.** This repo assumes `claude` is on your `PATH` and
 > `~/.claude/skills/` already exists. Run the cli-maxxing installer
 > before this one.
