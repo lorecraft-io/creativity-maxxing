@@ -21,7 +21,7 @@ If cli-maxxing is the terminal, creativity-maxxing is the canvas.
 One-liner:
 
 ```bash
-curl -fsSL https://github.com/lorecraft-io/creativity-maxxing/install.sh | bash
+bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/install.sh)
 ```
 
 Or clone and run locally:
@@ -34,7 +34,21 @@ bash install.sh
 
 The installer runs `step-4` then `step-5` in order, refuses to start if
 `claude` or `~/.claude/skills/` is missing, and is idempotent — re-run it
-any time without duplicating installs.
+any time without duplicating installs. The idempotency marker is
+`~/.claude/.creativity-maxxing-installed`; delete it to force a full
+reinstall.
+
+---
+
+## Update
+
+Pull the latest version of every tool without reinstalling from scratch:
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/update.sh)
+```
+
+All steps are idempotent — anything already up-to-date is skipped.
 
 ---
 
@@ -154,7 +168,7 @@ passing flags through the skill invocation.
 ## Uninstall
 
 ```bash
-curl -fsSL https://github.com/lorecraft-io/creativity-maxxing/uninstall.sh | bash
+bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/uninstall.sh)
 ```
 
 Or, from a clone:
