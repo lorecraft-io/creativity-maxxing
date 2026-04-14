@@ -5,9 +5,8 @@
 CLAUDE.md
 .DS_Store
 
-# Obsidian vault index note — this repo is cloned inside the maintainer's
-# 2ndBrain vault, which auto-creates a folder-index note named after the
-# containing folder. Not part of the repo.
+# Auto-generated folder-index note (created by some editors when cloning
+# into a parent directory that names its index files after subfolders).
 creativity-maxxing.md
 
 # Environment / secrets
