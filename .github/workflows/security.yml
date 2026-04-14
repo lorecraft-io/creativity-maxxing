@@ -1,0 +1,43 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 9 * * 1' # Weekly Monday 9am UTC
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck-strict:
+    name: ShellCheck (error severity)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run ShellCheck at error severity
+        uses: ludeeus/action-shellcheck@94e0aab03ca135d11a35e5bfc14e6746dc56e7e9 # v2.0.0
+        with:
+          scandir: '.'
+          severity: error
+          ignore_paths: node_modules
+
+  secret-scan:
+    name: Secret scanning
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Scan for hardcoded secrets
+        run: |
+          # Fail if real-looking API keys are found in tracked files
+          if git ls-files | xargs grep -lniE \
+            "(sk-ant-api|ghp_[0-9A-Za-z]{36}|xoxb-[0-9A-Za-z-]+|AKIA[0-9A-Z]{16})" \
+            2>/dev/null | grep -v ".git"; then
+            echo "::error::Potential hardcoded secrets detected — see matches above"
+            exit 1
+          fi
+          echo "No hardcoded secrets detected"
