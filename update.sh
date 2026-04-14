@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # creativity-maxxing — Update
-# Re-runs the installer from the latest version on GitHub.
-# All steps are idempotent — existing installs are skipped.
+# Clones the latest version and re-runs all idempotent steps.
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
@@ -14,9 +13,12 @@ echo -e "${BLUE}  creativity-maxxing — Update${NC}"
 echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-BASE_URL="https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main"
+_TMPDIR="$(mktemp -d)"
+trap 'rm -rf "$_TMPDIR"' EXIT
+git clone --quiet --depth 1 https://github.com/lorecraft-io/creativity-maxxing.git "$_TMPDIR"
 
-bash <(curl -fsSL "$BASE_URL/install.sh")
+bash "$_TMPDIR/step-4/step-4-install.sh"
+bash "$_TMPDIR/step-5/step-5-install.sh"
 
 echo ""
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
