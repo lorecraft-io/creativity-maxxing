@@ -171,6 +171,7 @@ main() {
     remove_whisper_cpp
     remove_whisper_mcp
     remove_ffmpeg_prompt
+    rm -f "$HOME/.claude/.creativity-maxxing-installed"
     success "creativity-maxxing uninstall complete."
 }
 
