@@ -7,12 +7,7 @@ transcription pipeline for audio and social-media clips.
 
 If cli-maxxing is the terminal, creativity-maxxing is the canvas.
 
-> **Prereq: cli-maxxing** — install [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing) first.
->
-> **Requires `cli-maxxing`
-> installed first.** This repo assumes `claude` is on your `PATH` and
-> `~/.claude/skills/` already exists. Run the cli-maxxing installer
-> before this one.
+> **Prereq: cli-maxxing** — install [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing) first. This repo assumes `claude` is on your `PATH` and `~/.claude/skills/` already exists.
 
 ---
 
@@ -185,11 +180,17 @@ non-creative tooling — answer `N` to keep it.
 
 ---
 
-## Companion repos
+## The Trilogy
 
-- [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing) — the
-  terminal half. Required before this installer will run. See its
-  "Companion Repos" section for the full constellation.
+This is one of three repos in the cli-maxxing stack:
+
+| Repo | What it does |
+|------|-------------|
+| [`cli-maxxing`](https://github.com/lorecraft-io/cli-maxxing) | Foundation — Claude Code, shell aliases, Ruflo, dev tools, productivity MCPs |
+| **`creativity-maxxing`** | **This repo** — design skills + video/audio pipeline |
+| [`2ndbrain-maxxing`](https://github.com/lorecraft-io/2ndbrain-maxxing) | Obsidian PKM vault setup, cbrain/cbraintg commands |
+
+Install `cli-maxxing` first. `creativity-maxxing` and `2ndbrain-maxxing` can be installed in either order after that.
 
 ---
 
