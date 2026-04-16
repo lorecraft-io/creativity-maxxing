@@ -5,7 +5,7 @@ MARKER="$HOME/.claude/.creativity-maxxing-installed"
 [ -f "$MARKER" ] && { echo "creativity-maxxing already installed. Run uninstall.sh to reinstall."; exit 0; }
 
 command -v claude >/dev/null || { echo "Claude Code not found — run cli-maxxing first"; exit 1; }
-[ -d "$HOME/.claude/skills" ] || { echo "~/.claude/skills missing — run cli-maxxing first"; exit 1; }
+[ -d "$HOME/.claude/skills" ] || { echo "\$HOME/.claude/skills missing — run cli-maxxing first"; exit 1; }
 
 # Resolve repo root — works from local clone AND bash <(curl ...)
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
