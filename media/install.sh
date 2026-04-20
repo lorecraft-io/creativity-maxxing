@@ -2,10 +2,9 @@
 set -uo pipefail
 
 # =============================================================================
-# Step 5 — Visual Media Tools
-# Installs Remotion skills, YouTube transcripts, Instagram/social transcription
-# (yt-dlp + Whisper), and FFmpeg for programmatic video/audio workflows
-# Run this in your terminal after completing Steps 1-4
+# creativity-maxxing — Media module
+# Installs Remotion, Higgsfield/Seedance prompt skills, YouTube transcripts,
+# IG/social transcription (yt-dlp + Whisper), and FFmpeg.
 # =============================================================================
 
 RED='\033[0;31m'
@@ -40,10 +39,10 @@ detect_os() {
 # -----------------------------------------------------------------------------
 verify_prerequisites() {
     if ! command -v node &>/dev/null; then
-        fail "Node.js not found. Run Step 1 first."
+        fail "Node.js not found. Install cli-maxxing first."
     fi
     if ! command -v claude &>/dev/null; then
-        fail "Claude Code not found. Run Step 1 first."
+        fail "Claude Code not found. Install cli-maxxing first."
     fi
     success "Prerequisites verified"
 }
@@ -54,20 +53,16 @@ verify_prerequisites() {
 install_remotion_skills() {
     info "Installing Remotion skills for Claude Code..."
 
-    # Check if already installed
     if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
         success "Remotion skills already installed"
         return
     fi
 
-    # Install globally with auto-confirm
     npx skills add remotion-dev/skills --yes --global 2>/dev/null
 
-    # Verify installation
     if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
         success "Remotion skills installed for Claude Code"
     else
-        # Try project-level install as fallback
         npx skills add remotion-dev/skills --yes 2>/dev/null
 
         if [ -d ".agents/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
@@ -79,12 +74,85 @@ install_remotion_skills() {
 }
 
 # -----------------------------------------------------------------------------
+# Install Higgsfield / Seedance 2.0 prompt skills (15 skills)
+# Upstream: beshuaxian/higgsfield-seedance2-jineng
+# We clone the repo once into a temp dir and copy each skills/<n>/SKILL.md to
+# ~/.claude/skills/<n>/SKILL.md. Idempotent per-skill.
+# -----------------------------------------------------------------------------
+install_higgsfield_skills() {
+    info "Installing Higgsfield / Seedance 2.0 prompt skills (15)..."
+
+    local SKILL_NAMES=(
+        "01-cinematic"
+        "02-3d-cgi"
+        "03-cartoon"
+        "04-comic-to-video"
+        "05-fight-scenes"
+        "06-motion-design-ad"
+        "07-ecommerce-ad"
+        "08-anime-action"
+        "09-product-360"
+        "10-music-video"
+        "11-social-hook"
+        "12-brand-story"
+        "13-fashion-lookbook"
+        "14-food-beverage"
+        "15-real-estate"
+    )
+
+    local missing=0
+    for s in "${SKILL_NAMES[@]}"; do
+        if [ ! -f "$HOME/.claude/skills/$s/SKILL.md" ]; then
+            missing=$((missing + 1))
+        fi
+    done
+
+    if [ "$missing" -eq 0 ]; then
+        success "Higgsfield / Seedance skills already installed (all 15)"
+        return
+    fi
+
+    local _TMP
+    _TMP="$(mktemp -d)"
+    trap 'rm -rf "$_TMP"' RETURN
+
+    if ! git clone --quiet --depth 1 https://github.com/beshuaxian/higgsfield-seedance2-jineng.git "$_TMP" 2>/dev/null; then
+        soft_fail "Could not clone Higgsfield repo — skipping. Install manually: https://github.com/beshuaxian/higgsfield-seedance2-jineng"
+        return
+    fi
+
+    local installed=0
+    for s in "${SKILL_NAMES[@]}"; do
+        local src="$_TMP/skills/$s/SKILL.md"
+        local dest_dir="$HOME/.claude/skills/$s"
+        local dest="$dest_dir/SKILL.md"
+
+        if [ -f "$dest" ]; then
+            continue
+        fi
+        if [ ! -f "$src" ]; then
+            warn "Upstream missing skill: $s (skipping)"
+            continue
+        fi
+
+        mkdir -p "$dest_dir"
+        cp "$src" "$dest"
+        installed=$((installed + 1))
+    done
+
+    if [ "$installed" -gt 0 ]; then
+        success "Higgsfield / Seedance skills installed ($installed new, $((${#SKILL_NAMES[@]} - installed)) already present)"
+    else
+        success "Higgsfield / Seedance skills verified"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Install YouTube Transcript MCP (free transcript extraction from YouTube)
 # -----------------------------------------------------------------------------
 install_youtube_transcript() {
     info "Installing YouTube Transcript MCP server..."
 
-    # Check if already registered
     if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
         success "YouTube Transcript MCP already installed"
         return
@@ -105,7 +173,6 @@ install_youtube_transcript() {
 install_ytdlp_mcp() {
     info "Installing yt-dlp MCP server..."
 
-    # Check if already registered
     if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
         success "yt-dlp MCP already installed"
         return
@@ -192,7 +259,6 @@ install_whisper_cpp() {
 install_whisper_mcp() {
     info "Installing Whisper MCP server..."
 
-    # Check if already registered
     if claude mcp list 2>/dev/null | grep -q "whisper-mcp"; then
         success "Whisper MCP already installed"
         return
@@ -246,7 +312,7 @@ run_self_test() {
     TEST_PASS=0
     TEST_FAIL=0
 
-    # Remotion skills installed
+    # Remotion skills
     if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ] || [ -d ".agents/skills/remotion-best-practices" ]; then
         success "TEST: Remotion skills installed"
         TEST_PASS=$((TEST_PASS + 1))
@@ -255,7 +321,27 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # YouTube Transcript MCP registered
+    # Higgsfield skills — count how many of 15 exist
+    local HIGGS_COUNT=0
+    for s in 01-cinematic 02-3d-cgi 03-cartoon 04-comic-to-video 05-fight-scenes \
+             06-motion-design-ad 07-ecommerce-ad 08-anime-action 09-product-360 \
+             10-music-video 11-social-hook 12-brand-story 13-fashion-lookbook \
+             14-food-beverage 15-real-estate; do
+        if [ -f "$HOME/.claude/skills/$s/SKILL.md" ]; then
+            HIGGS_COUNT=$((HIGGS_COUNT + 1))
+        fi
+    done
+    if [ "$HIGGS_COUNT" -eq 15 ]; then
+        success "TEST: Higgsfield / Seedance skills installed (15/15)"
+        TEST_PASS=$((TEST_PASS + 1))
+    elif [ "$HIGGS_COUNT" -gt 0 ]; then
+        warn "TEST: Higgsfield / Seedance skills partial ($HIGGS_COUNT/15)"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        soft_fail "TEST: Higgsfield / Seedance skills not found"
+        TEST_FAIL=$((TEST_FAIL + 1))
+    fi
+
     if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
         success "TEST: YouTube Transcript MCP registered"
         TEST_PASS=$((TEST_PASS + 1))
@@ -264,7 +350,6 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # yt-dlp MCP registered
     if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
         success "TEST: yt-dlp MCP registered"
         TEST_PASS=$((TEST_PASS + 1))
@@ -273,7 +358,6 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # yt-dlp CLI available
     if command -v yt-dlp &>/dev/null; then
         success "TEST: yt-dlp CLI available"
         TEST_PASS=$((TEST_PASS + 1))
@@ -282,7 +366,6 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # whisper-cpp binary
     if command -v whisper-cli &>/dev/null || command -v whisper-cpp &>/dev/null || command -v whisper &>/dev/null; then
         success "TEST: whisper-cpp installed"
         TEST_PASS=$((TEST_PASS + 1))
@@ -291,7 +374,6 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # Whisper MCP registered
     if claude mcp list 2>/dev/null | grep -q "whisper-mcp"; then
         success "TEST: Whisper MCP registered"
         TEST_PASS=$((TEST_PASS + 1))
@@ -300,7 +382,6 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # FFmpeg available
     if command -v ffmpeg &>/dev/null; then
         success "TEST: FFmpeg available"
         TEST_PASS=$((TEST_PASS + 1))
@@ -309,7 +390,6 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # skills CLI available
     if npx skills --version &>/dev/null 2>&1; then
         success "TEST: Skills CLI available"
         TEST_PASS=$((TEST_PASS + 1))
@@ -335,23 +415,23 @@ run_self_test() {
 print_summary() {
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}  Step 5 Complete — Visual Media Tools are Ready${NC}"
+    echo -e "${GREEN}  Media Module — Ready${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo "  Remotion, YouTube Transcripts, and Instagram/Social"
-    echo "  Transcription are now available in Claude Code."
+    echo "  Remotion, Higgsfield/Seedance prompt skills, YouTube Transcripts,"
+    echo "  Instagram/social transcription (yt-dlp + Whisper), and FFmpeg"
+    echo "  are now available in Claude Code."
     echo ""
     echo "  What you can do now:"
-    echo "    - Create videos programmatically with React"
-    echo "    - Add animations, transitions, captions, and 3D content"
-    echo "    - Process audio and video with FFmpeg"
-    echo "    - Generate data visualizations as video"
+    echo "    - Generate Seedance 2.0 prompts in 15 distinct video styles"
+    echo "    - Create videos programmatically with Remotion + React"
     echo "    - Pull transcripts from any YouTube video"
-    echo "    - Transcribe Instagram Reels, TikToks, and other social media"
+    echo "    - Transcribe Instagram Reels, TikToks, and other social media locally"
+    echo "    - Process audio/video with FFmpeg"
     echo ""
-    echo "  Try it: ask Claude to create a Remotion video project,"
-    echo "  paste a YouTube link for a transcript, or paste an Instagram"
-    echo "  Reel link and ask Claude to transcribe it."
+    echo "  Try it: ask Claude to 'make me a cinematic Seedance prompt for a"
+    echo "  coffee-shop launch video,' paste an IG Reel URL for a transcript,"
+    echo "  or start a new Remotion project."
     echo ""
     if [ "$ERRORS" -gt 0 ]; then
         echo -e "  ${YELLOW}Warnings: $ERRORS issue(s) detected.${NC}"
@@ -359,8 +439,6 @@ print_summary() {
         echo ""
     fi
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo ""
-    echo "  Check the README for more steps as they're added."
     echo ""
 }
 
@@ -370,14 +448,15 @@ print_summary() {
 main() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}  Step 5 — Visual Media${NC}"
-    echo -e "${BLUE}  Video creation + social media transcription • macOS + Linux${NC}"
+    echo -e "${BLUE}  Media Module${NC}"
+    echo -e "${BLUE}  Remotion + Higgsfield + Transcription • macOS + Linux${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
     detect_os
     verify_prerequisites
     install_remotion_skills
+    install_higgsfield_skills
     install_youtube_transcript
     install_ytdlp_cli
     install_ytdlp_mcp

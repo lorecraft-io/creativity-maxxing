@@ -3,7 +3,7 @@ set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — uninstall
-# Removes every tool installed by step-4 and step-5, in reverse order.
+# Removes every tool installed by the design + media modules, in reverse order.
 # ffmpeg is prompted separately because it is frequently system-shared.
 # =============================================================================
 
@@ -34,13 +34,14 @@ remove_uiux_skill() {
 # -----------------------------------------------------------------------------
 remove_taste_skills() {
     local variants=(
-        "taste-skill"
-        "redesign-skill"
-        "soft-skill"
-        "output-skill"
-        "minimalist-skill"
-        "brutalist-skill"
-        "stitch-skill"
+        "design-taste-frontend"
+        "redesign-existing-projects"
+        "high-end-visual-design"
+        "full-output-enforcement"
+        "minimalist-ui"
+        "industrial-brutalist-ui"
+        "stitch-design-taste"
+        "gpt-taste"
     )
     local removed=0
     for v in "${variants[@]}"; do
@@ -65,6 +66,42 @@ remove_magic_mcp() {
             info "21st.dev Magic MCP not registered"
         fi
     fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove Canva MCP
+# -----------------------------------------------------------------------------
+remove_canva_mcp() {
+    if command -v claude >/dev/null 2>&1; then
+        if claude mcp list 2>/dev/null | grep -qi "canva"; then
+            claude mcp remove canva 2>/dev/null || true
+            success "Removed Canva MCP"
+        else
+            info "Canva MCP not registered"
+        fi
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove Higgsfield / Seedance 2.0 prompt skills
+# -----------------------------------------------------------------------------
+remove_higgsfield_skills() {
+    local skills=(
+        "01-cinematic" "02-3d-cgi" "03-cartoon" "04-comic-to-video"
+        "05-fight-scenes" "06-motion-design-ad" "07-ecommerce-ad"
+        "08-anime-action" "09-product-360" "10-music-video"
+        "11-social-hook" "12-brand-story" "13-fashion-lookbook"
+        "14-food-beverage" "15-real-estate"
+    )
+    local removed=0
+    for s in "${skills[@]}"; do
+        local dir="$HOME/.claude/skills/$s"
+        if [ -d "$dir" ] || [ -L "$dir" ]; then
+            rm -rf "$dir"
+            removed=$((removed + 1))
+        fi
+    done
+    success "Removed $removed Higgsfield/Seedance skill(s)"
 }
 
 # -----------------------------------------------------------------------------
@@ -163,6 +200,8 @@ main() {
     remove_uiux_skill
     remove_taste_skills
     remove_magic_mcp
+    remove_canva_mcp
+    remove_higgsfield_skills
     remove_remotion_skills
     remove_youtube_transcript_mcp
     remove_ytdlp_mcp

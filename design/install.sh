@@ -2,9 +2,8 @@
 set -uo pipefail
 
 # =============================================================================
-# Step 4 — UI/UX Pro Max Skill + Taste Skill (Leonxlnx) + 21st.dev Magic MCP
-# Installs design intelligence, anti-slop taste skills, and component tools.
-# Run this in your terminal after completing Steps 1-3
+# creativity-maxxing — Design module
+# Installs design intelligence, anti-slop taste skills, and component/Canva MCPs.
 # =============================================================================
 
 RED='\033[0;31m'
@@ -39,10 +38,10 @@ detect_os() {
 # -----------------------------------------------------------------------------
 verify_prerequisites() {
     if ! command -v node &>/dev/null; then
-        fail "Node.js not found. Run Step 1 first."
+        fail "Node.js not found. Install cli-maxxing first."
     fi
     if ! command -v claude &>/dev/null; then
-        fail "Claude Code not found. Run Step 1 first."
+        fail "Claude Code not found. Install cli-maxxing first."
     fi
     success "Prerequisites verified"
 }
@@ -61,7 +60,6 @@ install_uiux_skill() {
     info "Installing UI/UX Pro Max Skill..."
     mkdir -p "$SKILL_DIR"
 
-    # Download the skill from the repo (file is CLAUDE.md in the repo, we save as SKILL.md)
     SKILL_URL="https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/main/CLAUDE.md"
     curl -fsSL "$SKILL_URL" -o "$SKILL_DIR/SKILL.md" 2>/dev/null
 
@@ -74,40 +72,57 @@ install_uiux_skill() {
 
 # -----------------------------------------------------------------------------
 # Install Taste Skill (Leonxlnx/taste-skill)
-# Installs 7 variants: taste, redesign, soft, output, minimalist, brutalist, stitch.
-# Each becomes its own skill folder under ~/.claude/skills/.
+# Upstream ships 8 skills whose `name:` frontmatter drives their installed path:
+#   design-taste-frontend, high-end-visual-design, full-output-enforcement,
+#   redesign-existing-projects, stitch-design-taste, minimalist-ui,
+#   industrial-brutalist-ui, gpt-taste
 # -----------------------------------------------------------------------------
+TASTE_INSTALLED_NAMES=(
+    "design-taste-frontend"
+    "high-end-visual-design"
+    "full-output-enforcement"
+    "redesign-existing-projects"
+    "stitch-design-taste"
+    "minimalist-ui"
+    "industrial-brutalist-ui"
+    "gpt-taste"
+)
+
+taste_installed_count() {
+    local count=0
+    for v in "${TASTE_INSTALLED_NAMES[@]}"; do
+        if [ -d "$HOME/.claude/skills/$v" ] || [ -L "$HOME/.claude/skills/$v" ]; then
+            count=$((count + 1))
+        fi
+    done
+    echo "$count"
+}
+
 install_taste_skill() {
-    # If any of the variants is already present, assume the pack is installed.
-    if [ -d "$HOME/.claude/skills/taste-skill" ] \
-        || [ -L "$HOME/.claude/skills/taste-skill" ] \
-        || [ -d "$HOME/.claude/skills/soft-skill" ] \
-        || [ -d "$HOME/.claude/skills/minimalist-skill" ]; then
-        success "Taste Skill already installed"
+    local before_count
+    before_count="$(taste_installed_count)"
+    if [ "$before_count" -ge 7 ]; then
+        success "Taste Skill already installed ($before_count/8 variants present)"
         return
     fi
 
     info "Installing Taste Skill pack (Leonxlnx/taste-skill)..."
 
-    # The authoritative install form documented in the taste-skill README is the
-    # full GitHub URL. Some versions of the `skills` CLI do not accept the
-    # owner/repo shorthand, so we use the URL form the README guarantees.
     local TASTE_SKILL_URL="https://github.com/Leonxlnx/taste-skill"
 
-    # Use the skills CLI — same pattern as the Remotion install in Step 5.
-    # The pack ships 7 variants; the CLI expands each one into its own skill dir.
     npx skills add "$TASTE_SKILL_URL" --yes --global 2>/dev/null
 
-    # Re-check. If the global install didn't land it, try without --global
-    # as a fallback (some skills CLI versions don't honor --global).
-    if [ ! -d "$HOME/.claude/skills/taste-skill" ] && [ ! -L "$HOME/.claude/skills/taste-skill" ]; then
+    local after_count
+    after_count="$(taste_installed_count)"
+    if [ "$after_count" -lt 7 ]; then
         npx skills add "$TASTE_SKILL_URL" --yes 2>/dev/null
+        after_count="$(taste_installed_count)"
     fi
 
-    if [ -d "$HOME/.claude/skills/taste-skill" ] || [ -L "$HOME/.claude/skills/taste-skill" ]; then
-        success "Taste Skill installed (7 variants under ~/.claude/skills/)"
+    if [ "$after_count" -ge 7 ]; then
+        success "Taste Skill installed ($after_count/8 variants under ~/.claude/skills/)"
     else
-        soft_fail "Taste Skill installation could not be verified — install manually: npx skills add https://github.com/Leonxlnx/taste-skill --yes --global"
+        soft_fail "Taste Skill installation could not be verified ($after_count/8 variants found) — install manually: npx skills add https://github.com/Leonxlnx/taste-skill --yes --global"
     fi
 }
 
@@ -115,7 +130,6 @@ install_taste_skill() {
 # Install 21st.dev Magic MCP
 # -----------------------------------------------------------------------------
 install_21st_magic() {
-    # Check if already configured
     if claude mcp list 2>/dev/null | grep -qi "magic\|21st" 2>/dev/null; then
         success "21st.dev Magic MCP already configured"
         return
@@ -139,6 +153,30 @@ install_21st_magic() {
 }
 
 # -----------------------------------------------------------------------------
+# Install Canva MCP (remote, OAuth on first use)
+# -----------------------------------------------------------------------------
+install_canva_mcp() {
+    if claude mcp list 2>/dev/null | grep -qi "canva" 2>/dev/null; then
+        success "Canva MCP already configured"
+        return
+    fi
+
+    info "Adding Canva MCP (remote) to Claude Code..."
+
+    # Canva ships a hosted remote MCP at https://mcp.canva.com/mcp
+    # First call triggers OAuth in the user's browser.
+    claude mcp add --scope user --transport http canva https://mcp.canva.com/mcp 2>/dev/null \
+        || claude mcp add --transport http canva https://mcp.canva.com/mcp 2>/dev/null \
+        || claude mcp add --scope user --transport sse canva https://mcp.canva.com/mcp 2>/dev/null
+
+    if claude mcp list 2>/dev/null | grep -qi "canva" 2>/dev/null; then
+        success "Canva MCP configured — first call will open a browser for OAuth"
+    else
+        soft_fail "Canva MCP install could not be verified — add manually: claude mcp add --scope user --transport http canva https://mcp.canva.com/mcp"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Self-test
 # -----------------------------------------------------------------------------
 run_self_test() {
@@ -151,7 +189,6 @@ run_self_test() {
     TEST_PASS=0
     TEST_FAIL=0
 
-    # UI/UX Pro Max Skill
     if [ -f "$HOME/.claude/skills/ui-ux-pro-max/SKILL.md" ]; then
         success "TEST: UI/UX Pro Max Skill installed"
         TEST_PASS=$((TEST_PASS + 1))
@@ -160,21 +197,29 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # Taste Skill (Leonxlnx/taste-skill) — checks for the main variant folder
-    if [ -d "$HOME/.claude/skills/taste-skill" ] || [ -L "$HOME/.claude/skills/taste-skill" ]; then
-        success "TEST: Taste Skill installed"
+    local taste_count
+    taste_count="$(taste_installed_count)"
+    if [ "$taste_count" -ge 7 ]; then
+        success "TEST: Taste Skill installed ($taste_count/8 variants)"
         TEST_PASS=$((TEST_PASS + 1))
     else
-        soft_fail "TEST: Taste Skill not found"
+        soft_fail "TEST: Taste Skill incomplete ($taste_count/8 variants)"
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    # 21st.dev Magic MCP
     if claude mcp list 2>/dev/null | grep -qi "magic\|21st" 2>/dev/null; then
         success "TEST: 21st.dev Magic MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
         warn "TEST: 21st.dev Magic MCP may need manual setup (see instructions below)"
+        TEST_PASS=$((TEST_PASS + 1))
+    fi
+
+    if claude mcp list 2>/dev/null | grep -qi "canva" 2>/dev/null; then
+        success "TEST: Canva MCP configured"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        warn "TEST: Canva MCP may need manual setup"
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
@@ -195,24 +240,32 @@ run_self_test() {
 print_summary() {
     echo ""
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${GREEN}  Step 4 Complete — Design Tools Ready${NC}"
+    echo -e "${GREEN}  Design Module — Ready${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo "  Installed:"
     echo "    UI/UX Pro Max    $([ -f "$HOME/.claude/skills/ui-ux-pro-max/SKILL.md" ] && echo 'installed' || echo '—')"
-    echo "    Taste Skill      $([ -d "$HOME/.claude/skills/taste-skill" ] || [ -L "$HOME/.claude/skills/taste-skill" ] && echo 'installed (7 variants)' || echo '—')"
+    local taste_count
+    taste_count="$(taste_installed_count)"
+    if [ "$taste_count" -ge 7 ]; then
+        echo "    Taste Skill      installed ($taste_count/8 variants)"
+    else
+        echo "    Taste Skill      $taste_count/8 variants (partial)"
+    fi
     echo "    21st.dev Magic   $(claude mcp list 2>/dev/null | grep -qi 'magic\|21st' && echo 'configured' || echo 'needs manual setup')"
+    echo "    Canva MCP        $(claude mcp list 2>/dev/null | grep -qi 'canva' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
     echo ""
-    echo "  Taste Skill variants installed:"
-    echo "    - taste-skill       (main premium frontend rules, 3 knobs)"
-    echo "    - redesign-skill    (upgrade existing projects — audit first)"
-    echo "    - soft-skill        (expensive soft UI look, spring animations)"
-    echo "    - output-skill      (anti-laziness: no placeholder comments)"
-    echo "    - minimalist-skill  (clean, editorial, Notion/Linear style)"
-    echo "    - brutalist-skill   (raw mechanical, CRT terminal aesthetics — beta)"
-    echo "    - stitch-skill      (Google Stitch-compatible semantic rules)"
+    echo "  Taste Skill variants (installed names / slash commands):"
+    echo "    - /design-taste-frontend       (default premium frontend rules, 3 knobs)"
+    echo "    - /redesign-existing-projects  (upgrade existing projects — audit first)"
+    echo "    - /high-end-visual-design      (premium soft UI, spring animations)"
+    echo "    - /full-output-enforcement     (anti-laziness: no placeholder comments)"
+    echo "    - /minimalist-ui               (clean, editorial, Notion/Linear style)"
+    echo "    - /industrial-brutalist-ui     (raw mechanical, CRT terminal aesthetics)"
+    echo "    - /stitch-design-taste         (Google Stitch-compatible semantic rules)"
+    echo "    - /gpt-taste                   (GPT-leaning variant)"
     echo ""
-    echo "  taste-skill knobs (edit the SKILL.md to tune, 1-10 scale):"
+    echo "  design-taste-frontend knobs (edit its SKILL.md to tune, 1-10 scale):"
     echo "    DESIGN_VARIANCE   — 1-3 centered/clean   | 8-10 asymmetric/modern"
     echo "    MOTION_INTENSITY  — 1-3 simple hover     | 8-10 scroll-triggered"
     echo "    VISUAL_DENSITY    — 1-3 spacious/luxury  | 8-10 dense dashboards"
@@ -224,22 +277,20 @@ print_summary() {
     fi
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}  IMPORTANT: 21st.dev Magic MCP Manual Setup${NC}"
+    echo -e "${YELLOW}  Manual follow-ups you may need:${NC}"
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
-    echo "  If 21st.dev Magic wasn't auto-configured, do this:"
+    echo "  21st.dev Magic — if auto-config missed, grab a free API key:"
+    echo "    1. Go to https://21st.dev"
+    echo "    2. Create a free account"
+    echo "    3. Follow the MCP setup one-liner on their site"
     echo ""
-    echo "  1. Go to https://21st.dev"
-    echo "  2. Create a free account (no payment needed)"
-    echo "  3. Follow the MCP setup instructions on their site"
-    echo "  4. They'll give you a command to run in your terminal"
-    echo ""
-    echo "  Once connected, ask Claude to build any UI component"
-    echo "  and it will pull from 21st.dev's library automatically."
+    echo "  Canva MCP — OAuth on first use:"
+    echo "    1. Ask Claude to list Canva designs (or use any Canva tool)"
+    echo "    2. Claude opens a browser window — approve Canva access"
+    echo "    3. Done. Subsequent calls are seamless."
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo ""
-    echo "  Check the README for more steps as they're added."
     echo ""
 }
 
@@ -249,8 +300,8 @@ print_summary() {
 main() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${BLUE}  Step 4 — Design Tools${NC}"
-    echo -e "${BLUE}  UI/UX Pro Max + Taste Skill + 21st.dev Magic • macOS + Linux${NC}"
+    echo -e "${BLUE}  Design Module${NC}"
+    echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva • macOS + Linux${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
@@ -259,6 +310,7 @@ main() {
     install_uiux_skill
     install_taste_skill
     install_21st_magic
+    install_canva_mcp
     run_self_test
     print_summary
 }

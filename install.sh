@@ -9,14 +9,14 @@ command -v claude >/dev/null || { echo "Claude Code not found — run cli-maxxin
 
 # Resolve repo root — works from local clone AND bash <(curl ...)
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
-if [ ! -f "$HERE/step-4/step-4-install.sh" ]; then
+if [ ! -f "$HERE/design/install.sh" ]; then
     _TMPDIR="$(mktemp -d)"
     trap 'rm -rf "$_TMPDIR"' EXIT
     git clone --quiet --depth 1 https://github.com/lorecraft-io/creativity-maxxing.git "$_TMPDIR"
     HERE="$_TMPDIR"
 fi
 
-bash "$HERE/step-4/step-4-install.sh"
-bash "$HERE/step-5/step-5-install.sh"
+bash "$HERE/design/install.sh"
+bash "$HERE/media/install.sh"
 touch "$MARKER"
 echo "creativity-maxxing install complete."

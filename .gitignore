@@ -24,8 +24,14 @@ creativity-maxxing.md
 *.pfx
 credentials.json
 
-# Node (defensive — step scripts may install deps)
+# Node (defensive — install scripts may install deps)
 node_modules/
+
+# Test artifacts from running install.sh against the repo dir
+# (npx skills add may fall back to project-level install and drop these)
+.agents/
+skills/
+skills-lock.json
 
 # Media scratch (Remotion renders, whisper audio cache, yt-dlp downloads)
 out/
