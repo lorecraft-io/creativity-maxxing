@@ -6,7 +6,8 @@
 
 # creativity-maxxing
 
-**Turn Claude Code + your terminal into a creative studio — design, video, audio, and a transcription lab in one install.**
+**Turn Claude Code + your terminal into a creative studio — 
+design, video, audio, and a transcription lab in one install.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
