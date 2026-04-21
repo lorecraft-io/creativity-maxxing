@@ -177,6 +177,39 @@ install_canva_mcp() {
 }
 
 # -----------------------------------------------------------------------------
+# Generic remote HTTP MCP installer — used by Figma, Excalidraw, Gamma.
+# All three expose `claude mcp add --transport http <name> <url>` and trigger
+# OAuth in the user's browser on first tool use.
+# Args: $1 = friendly name (e.g. "Figma"), $2 = server name (e.g. "figma"), $3 = URL
+# -----------------------------------------------------------------------------
+install_remote_http_mcp() {
+    local label="$1"
+    local server="$2"
+    local url="$3"
+
+    if claude mcp list 2>/dev/null | grep -qi "^${server}\b\|[[:space:]]${server}\b" 2>/dev/null; then
+        success "${label} MCP already configured"
+        return
+    fi
+
+    info "Adding ${label} MCP (remote) to Claude Code..."
+
+    claude mcp add --scope user --transport http "$server" "$url" 2>/dev/null \
+        || claude mcp add --transport http "$server" "$url" 2>/dev/null \
+        || claude mcp add --scope user --transport sse "$server" "$url" 2>/dev/null
+
+    if claude mcp list 2>/dev/null | grep -qi "^${server}\b\|[[:space:]]${server}\b" 2>/dev/null; then
+        success "${label} MCP configured — first call will open a browser for OAuth"
+    else
+        soft_fail "${label} MCP install could not be verified — add manually: claude mcp add --scope user --transport http ${server} ${url}"
+    fi
+}
+
+install_figma_mcp()      { install_remote_http_mcp "Figma"      "figma"      "https://mcp.figma.com/mcp"; }
+install_excalidraw_mcp() { install_remote_http_mcp "Excalidraw" "excalidraw" "https://mcp.excalidraw.com/mcp"; }
+install_gamma_mcp()      { install_remote_http_mcp "Gamma"      "gamma"      "https://mcp.gamma.app/mcp"; }
+
+# -----------------------------------------------------------------------------
 # Self-test
 # -----------------------------------------------------------------------------
 run_self_test() {
@@ -301,7 +334,7 @@ main() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BLUE}  Design Module${NC}"
-    echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva • macOS + Linux${NC}"
+    echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva + Figma + Excalidraw + Gamma${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
@@ -311,6 +344,9 @@ main() {
     install_taste_skill
     install_21st_magic
     install_canva_mcp
+    install_figma_mcp
+    install_excalidraw_mcp
+    install_gamma_mcp
     run_self_test
     print_summary
 }
