@@ -73,9 +73,9 @@ remove_magic_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -q "magic"; then
             claude mcp remove magic 2>/dev/null || true
-            success "Removed 21st.dev Magic MCP"
+            removed_one "Removed 21st.dev Magic MCP"
         else
-            info "21st.dev Magic MCP not registered"
+            skipped_one "21st.dev Magic MCP not registered"
         fi
     fi
 }
@@ -87,9 +87,9 @@ remove_canva_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -qi "canva"; then
             claude mcp remove canva 2>/dev/null || true
-            success "Removed Canva MCP"
+            removed_one "Removed Canva MCP"
         else
-            info "Canva MCP not registered"
+            skipped_one "Canva MCP not registered"
         fi
     fi
 }
@@ -101,9 +101,9 @@ remove_figma_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -qi "figma"; then
             claude mcp remove figma 2>/dev/null || true
-            success "Removed Figma MCP"
+            removed_one "Removed Figma MCP"
         else
-            info "Figma MCP not registered"
+            skipped_one "Figma MCP not registered"
         fi
     fi
 }
@@ -115,9 +115,9 @@ remove_excalidraw_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -qi "excalidraw"; then
             claude mcp remove excalidraw 2>/dev/null || true
-            success "Removed Excalidraw MCP"
+            removed_one "Removed Excalidraw MCP"
         else
-            info "Excalidraw MCP not registered"
+            skipped_one "Excalidraw MCP not registered"
         fi
     fi
 }
@@ -129,9 +129,9 @@ remove_gamma_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -qi "gamma"; then
             claude mcp remove gamma 2>/dev/null || true
-            success "Removed Gamma MCP"
+            removed_one "Removed Gamma MCP"
         else
-            info "Gamma MCP not registered"
+            skipped_one "Gamma MCP not registered"
         fi
     fi
 }
@@ -147,15 +147,19 @@ remove_higgsfield_skills() {
         "11-social-hook" "12-brand-story" "13-fashion-lookbook"
         "14-food-beverage" "15-real-estate"
     )
-    local removed=0
-    for s in "${skills[@]}"; do
-        local dir="$HOME/.claude/skills/$s"
+    local r=0 s=0
+    for sk in "${skills[@]}"; do
+        local dir="$HOME/.claude/skills/$sk"
         if [ -d "$dir" ] || [ -L "$dir" ]; then
             rm -rf "$dir"
-            removed=$((removed + 1))
+            r=$((r + 1))
+        else
+            s=$((s + 1))
         fi
     done
-    success "Removed $removed Higgsfield/Seedance skill(s)"
+    REMOVED=$((REMOVED + r))
+    SKIPPED=$((SKIPPED + s))
+    success "Higgsfield/Seedance skills: removed $r, skipped $s (already absent)"
 }
 
 # -----------------------------------------------------------------------------
@@ -165,9 +169,9 @@ remove_remotion_skills() {
     local SKILL_DIR="$HOME/.claude/skills/remotion-best-practices"
     if [ -d "$SKILL_DIR" ] || [ -L "$SKILL_DIR" ]; then
         rm -rf "$SKILL_DIR"
-        success "Removed Remotion skills"
+        removed_one "Removed Remotion skills"
     else
-        info "Remotion skills not present"
+        skipped_one "Remotion skills not present"
     fi
 }
 
@@ -178,9 +182,9 @@ remove_youtube_transcript_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
             claude mcp remove youtube-transcript 2>/dev/null || true
-            success "Removed YouTube Transcript MCP"
+            removed_one "Removed YouTube Transcript MCP"
         else
-            info "YouTube Transcript MCP not registered"
+            skipped_one "YouTube Transcript MCP not registered"
         fi
     fi
 }
@@ -192,9 +196,9 @@ remove_ytdlp_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
             claude mcp remove yt-dlp 2>/dev/null || true
-            success "Removed yt-dlp MCP"
+            removed_one "Removed yt-dlp MCP"
         else
-            info "yt-dlp MCP not registered"
+            skipped_one "yt-dlp MCP not registered"
         fi
     fi
 }
@@ -205,9 +209,9 @@ remove_ytdlp_mcp() {
 remove_ytdlp_cli() {
     if command -v brew >/dev/null 2>&1 && brew list yt-dlp >/dev/null 2>&1; then
         brew uninstall yt-dlp || warn "brew uninstall yt-dlp returned non-zero"
-        success "Removed yt-dlp CLI"
+        removed_one "Removed yt-dlp CLI"
     else
-        info "yt-dlp CLI not installed via Homebrew"
+        skipped_one "yt-dlp CLI not installed via Homebrew"
     fi
 }
 
@@ -217,9 +221,9 @@ remove_ytdlp_cli() {
 remove_whisper_cpp() {
     if command -v brew >/dev/null 2>&1 && brew list whisper-cpp >/dev/null 2>&1; then
         brew uninstall whisper-cpp || warn "brew uninstall whisper-cpp returned non-zero"
-        success "Removed whisper-cpp"
+        removed_one "Removed whisper-cpp"
     else
-        info "whisper-cpp not installed via Homebrew"
+        skipped_one "whisper-cpp not installed via Homebrew"
     fi
 }
 
@@ -230,9 +234,9 @@ remove_whisper_mcp() {
     if command -v claude >/dev/null 2>&1; then
         if claude mcp list 2>/dev/null | grep -q "whisper"; then
             claude mcp remove whisper-mcp 2>/dev/null || claude mcp remove whisper 2>/dev/null || true
-            success "Removed whisper-mcp"
+            removed_one "Removed whisper-mcp"
         else
-            info "whisper-mcp not registered"
+            skipped_one "whisper-mcp not registered"
         fi
     fi
 }
@@ -243,13 +247,37 @@ remove_whisper_mcp() {
 remove_ffmpeg_prompt() {
     if command -v brew >/dev/null 2>&1 && brew list ffmpeg >/dev/null 2>&1; then
         read -r -p "ffmpeg is system-shared. Uninstall it? [y/N] " ans
-        [[ "$ans" =~ ^[Yy]$ ]] && brew uninstall ffmpeg || echo "Leaving ffmpeg in place."
+        if [[ "$ans" =~ ^[Yy]$ ]]; then
+            brew uninstall ffmpeg
+            removed_one "Removed ffmpeg"
+        else
+            echo "Leaving ffmpeg in place."
+            skipped_one "ffmpeg left in place (user declined)"
+        fi
     else
-        info "ffmpeg not installed via Homebrew"
+        skipped_one "ffmpeg not installed via Homebrew"
     fi
 }
 
+print_summary() {
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${GREEN}  creativity-maxxing uninstall complete${NC}"
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "  Removed : $REMOVED item(s)"
+    echo "  Skipped : $SKIPPED item(s) (already absent or user declined)"
+    echo ""
+    echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+}
+
 main() {
+    echo ""
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BLUE}  creativity-maxxing — Uninstall${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
     info "Uninstalling creativity-maxxing..."
     remove_uiux_skill
     remove_taste_skills
@@ -267,7 +295,7 @@ main() {
     remove_whisper_mcp
     remove_ffmpeg_prompt
     rm -f "$HOME/.claude/.creativity-maxxing-installed"
-    success "creativity-maxxing uninstall complete."
+    print_summary
 }
 
 main "$@"
