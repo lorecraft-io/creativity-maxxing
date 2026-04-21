@@ -112,11 +112,11 @@ Everything else installs with zero accounts and zero keys.
 | whisper-cpp | Homebrew | Local Whisper inference — no API key, runs offline |
 | whisper-mcp | MCP server | Claude-side interface to whisper-cpp |
 | ffmpeg | Homebrew | Video/audio glue (shared — prompted before uninstall) |
-| [Figma](https://claude.ai) | claude.ai connector | Read Figma files, inspect frames, export design tokens, convert designs to code. Paste any figma.com URL and it resolves. |
-| [Excalidraw](https://claude.ai) | claude.ai connector | Generate + edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. |
-| [Gamma](https://claude.ai) | claude.ai connector | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. |
+| Figma | MCP server (claude.ai hosted) | Read Figma files, inspect frames, export design tokens, convert designs to code. Paste any figma.com URL and it resolves. |
+| Excalidraw | MCP server (claude.ai hosted) | Generate + edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. |
+| Gamma | MCP server (claude.ai hosted) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. |
 
-Local tools (Claude skill / MCP server / Homebrew) are **idempotent** — the install script checks and skips if already present. The three **claude.ai connectors** live on claude.ai's hosted side: enable them once at [claude.ai](https://claude.ai) → avatar → **Settings** → **Connectors** → pick each → **Connect**. No CLI touch needed.
+Local tools (Claude skill / MCP server / Homebrew) are **idempotent** — the install script checks and skips if already present. The three **claude.ai-hosted MCP servers** (Figma, Excalidraw, Gamma) show up in `claude mcp list` under the `claude.ai` section once enabled — turn each on at [claude.ai](https://claude.ai) → avatar → **Settings** → **Connectors** → pick each → **Connect**. No CLI touch needed, no local install.
 
 ---
 
