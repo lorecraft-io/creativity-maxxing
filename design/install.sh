@@ -187,7 +187,9 @@ install_remote_http_mcp() {
     local server="$2"
     local url="$3"
 
-    if claude mcp list 2>/dev/null | grep -qi "^${server}\b\|[[:space:]]${server}\b" 2>/dev/null; then
+    # Idempotency check — `claude mcp list` prints one MCP per line as "<name>: <url>"
+    # so a case-insensitive substring match on the server name is enough.
+    if claude mcp list 2>/dev/null | grep -qi "$server" 2>/dev/null; then
         success "${label} MCP already configured"
         return
     fi
@@ -198,7 +200,7 @@ install_remote_http_mcp() {
         || claude mcp add --transport http "$server" "$url" 2>/dev/null \
         || claude mcp add --scope user --transport sse "$server" "$url" 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -qi "^${server}\b\|[[:space:]]${server}\b" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qi "$server" 2>/dev/null; then
         success "${label} MCP configured — first call will open a browser for OAuth"
     else
         soft_fail "${label} MCP install could not be verified — add manually: claude mcp add --scope user --transport http ${server} ${url}"
