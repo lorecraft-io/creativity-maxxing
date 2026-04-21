@@ -23,7 +23,7 @@ design, video, audio, transcription in one install.**
 | [Why this exists](#why-this-exists) | Context | Why AI ships ugly UI by default and how this fixes it | ~2 min |
 | [Cheat sheet](./CHEAT-SHEET.md) | Reference | Every slash command / skill / MCP call you'll use | ~2 min |
 | [Install](#install) | Setup | One-liner (curl) or clone + run | ~1 min |
-| [Manual steps](#manual-steps-oauth--accounts) | Setup | The 2-3 tools that want an OAuth click or API key | ~1 min |
+| [Manual steps](#manual-steps-oauth--accounts) | Setup | The 5 tools that want an OAuth click or API key | ~1 min |
 | [What gets installed](#what-gets-installed) | Reference | Table of every skill / MCP / binary | ~1 min |
 | [How I use each piece](#how-i-actually-use-each-piece) | Context | The reason each tool is in the box | ~3 min |
 | [Taste skills](#taste-skills) | Reference | 8 variants, 3 knobs, when to pick which | ~2 min |
@@ -110,8 +110,8 @@ Everything else installs with zero accounts and zero keys.
 | Higgsfield / Seedance 2.0 | Claude skills (15) | Style-specific video prompt engineers (cinematic, anime, product 360°, etc.) |
 | Remotion best-practices | Claude skill | React-based programmatic video |
 | YouTube Transcript MCP | MCP server | Transcripts from any public YouTube video |
-| yt-dlp MCP | MCP server | Pull audio/video from IG, TikTok, YT, and 1000+ sites |
 | yt-dlp CLI | Homebrew | The binary behind yt-dlp MCP |
+| yt-dlp MCP | MCP server | Pull audio/video from IG, TikTok, YT, and 1000+ sites |
 | whisper-cpp | Homebrew | Local Whisper inference — no API key, runs offline |
 | whisper-mcp | MCP server | Claude-side interface to whisper-cpp |
 | ffmpeg | Homebrew | Video/audio glue (shared — prompted before uninstall) |
@@ -199,7 +199,7 @@ Or, from a clone:
 bash uninstall.sh
 ```
 
-Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp. **Prompts before touching `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
+Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp, ffmpeg. **Prompts before removing `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
 
 ---
 

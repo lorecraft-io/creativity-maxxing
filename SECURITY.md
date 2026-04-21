@@ -75,15 +75,15 @@ download the file, compute `shasum -a 256`, then update both `*_COMMIT` and
 
 ## Install-script expectations
 
-Both `install.sh` and `uninstall.sh` in this repo:
+Scripts in this repo:
 
-- use `set -euo pipefail` to fail fast
+- use `set -euo pipefail` to fail fast (`design/install.sh` uses `set -uo pipefail` — `-e` intentionally omitted so the design module can collect all errors and report at the end rather than aborting on the first one)
 - require `claude` + `~/.claude/skills` to already exist (i.e. cli-maxxing
   ran successfully first)
 - never auto-download a binary without HTTPS
 - prompt before touching `ffmpeg` during uninstall because it is
   frequently system-shared with non-creative tooling
-- pin third-party skill downloads to a commit SHA with SHA-256 integrity check
+- pin the UI/UX Pro Max skill download to a commit SHA with SHA-256 integrity check (`design/install.sh`); Higgsfield/Seedance skills are cloned from HEAD of the upstream repo without SHA pinning
 
 If you modify a module script, re-run `bash -n design/install.sh media/install.sh`
 and `shellcheck design/install.sh media/install.sh install.sh uninstall.sh update.sh` before merging.

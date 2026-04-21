@@ -27,7 +27,7 @@ jobs:
         with:
           scandir: '.'
           severity: error
-          ignore: node_modules
+          ignore_paths: node_modules
 
   secret-scan:
     name: Secret scanning
