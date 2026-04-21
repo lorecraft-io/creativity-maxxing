@@ -112,20 +112,11 @@ Everything else installs with zero accounts and zero keys.
 | whisper-cpp | Homebrew | Local Whisper inference — no API key, runs offline |
 | whisper-mcp | MCP server | Claude-side interface to whisper-cpp |
 | ffmpeg | Homebrew | Video/audio glue (shared — prompted before uninstall) |
+| [Figma](https://claude.ai) | claude.ai connector | Read Figma files, inspect frames, export design tokens, convert designs to code. Paste any figma.com URL and it resolves. |
+| [Excalidraw](https://claude.ai) | claude.ai connector | Generate + edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. |
+| [Gamma](https://claude.ai) | claude.ai connector | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. |
 
-All targets are **idempotent**: check-and-skip if the target already exists.
-
-### Also worth flipping on — claude.ai connectors
-
-These live on claude.ai's hosted side (Settings → Connectors), not in this install script. Enable them there and they show up automatically in any Claude session alongside everything above. No local config, no keys, just a toggle + OAuth:
-
-| Tool | What it does |
-|------|--------------|
-| [**Figma**](https://claude.ai) | Read Figma files, inspect frames, export design tokens, and convert designs to code. Paste any figma.com URL into Claude and it just resolves. Pair with `taste-skill` + `21st.dev Magic` to go from a frame to a working component in one loop. |
-| [**Excalidraw**](https://claude.ai) | Generate and edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. Great for system sketches, flowcharts, whiteboard sessions. |
-| [**Gamma**](https://claude.ai) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context — Claude already knows what "looks expensive" and Gamma renders it. |
-
-To enable: open [claude.ai](https://claude.ai) → click your avatar → **Settings** → **Connectors** → find each one → **Connect**. One OAuth click per tool. No CLI touch needed.
+Local tools (Claude skill / MCP server / Homebrew) are **idempotent** — the install script checks and skips if already present. The three **claude.ai connectors** live on claude.ai's hosted side: enable them once at [claude.ai](https://claude.ai) → avatar → **Settings** → **Connectors** → pick each → **Connect**. No CLI touch needed.
 
 ---
 
