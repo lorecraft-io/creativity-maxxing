@@ -101,7 +101,7 @@ taste_installed_count() {
 install_taste_skill() {
     local before_count
     before_count="$(taste_installed_count)"
-    if [ "$before_count" -ge 7 ]; then
+    if [ "$before_count" -ge 8 ]; then
         success "Taste Skill already installed ($before_count/8 variants present)"
         return
     fi
@@ -114,12 +114,12 @@ install_taste_skill() {
 
     local after_count
     after_count="$(taste_installed_count)"
-    if [ "$after_count" -lt 7 ]; then
+    if [ "$after_count" -lt 8 ]; then
         npx skills add "$TASTE_SKILL_URL" --yes 2>/dev/null
         after_count="$(taste_installed_count)"
     fi
 
-    if [ "$after_count" -ge 7 ]; then
+    if [ "$after_count" -ge 8 ]; then
         success "Taste Skill installed ($after_count/8 variants under ~/.claude/skills/)"
     else
         soft_fail "Taste Skill installation could not be verified ($after_count/8 variants found) — install manually: npx skills add https://github.com/Leonxlnx/taste-skill --yes --global"
@@ -234,7 +234,7 @@ run_self_test() {
 
     local taste_count
     taste_count="$(taste_installed_count)"
-    if [ "$taste_count" -ge 7 ]; then
+    if [ "$taste_count" -ge 8 ]; then
         success "TEST: Taste Skill installed ($taste_count/8 variants)"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -255,6 +255,30 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     else
         warn "TEST: Canva MCP may need manual setup"
+        TEST_PASS=$((TEST_PASS + 1))
+    fi
+
+    if claude mcp list 2>/dev/null | grep -qi "figma" 2>/dev/null; then
+        success "TEST: Figma MCP configured"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        warn "TEST: Figma MCP may need manual setup"
+        TEST_PASS=$((TEST_PASS + 1))
+    fi
+
+    if claude mcp list 2>/dev/null | grep -qi "excalidraw" 2>/dev/null; then
+        success "TEST: Excalidraw MCP configured"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        warn "TEST: Excalidraw MCP may need manual setup"
+        TEST_PASS=$((TEST_PASS + 1))
+    fi
+
+    if claude mcp list 2>/dev/null | grep -qi "gamma" 2>/dev/null; then
+        success "TEST: Gamma MCP configured"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        warn "TEST: Gamma MCP may need manual setup"
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
@@ -282,13 +306,16 @@ print_summary() {
     echo "    UI/UX Pro Max    $([ -f "$HOME/.claude/skills/ui-ux-pro-max/SKILL.md" ] && echo 'installed' || echo '—')"
     local taste_count
     taste_count="$(taste_installed_count)"
-    if [ "$taste_count" -ge 7 ]; then
+    if [ "$taste_count" -ge 8 ]; then
         echo "    Taste Skill      installed ($taste_count/8 variants)"
     else
         echo "    Taste Skill      $taste_count/8 variants (partial)"
     fi
     echo "    21st.dev Magic   $(claude mcp list 2>/dev/null | grep -qi 'magic\|21st' && echo 'configured' || echo 'needs manual setup')"
     echo "    Canva MCP        $(claude mcp list 2>/dev/null | grep -qi 'canva' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Figma MCP        $(claude mcp list 2>/dev/null | grep -qi 'figma' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Excalidraw MCP   $(claude mcp list 2>/dev/null | grep -qi 'excalidraw' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Gamma MCP        $(claude mcp list 2>/dev/null | grep -qi 'gamma' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
     echo ""
     echo "  Taste Skill variants (installed names / slash commands):"
     echo "    - /design-taste-frontend       (default premium frontend rules, 3 knobs)"
@@ -324,6 +351,11 @@ print_summary() {
     echo "    1. Ask Claude to list Canva designs (or use any Canva tool)"
     echo "    2. Claude opens a browser window — approve Canva access"
     echo "    3. Done. Subsequent calls are seamless."
+    echo ""
+    echo "  Figma / Excalidraw / Gamma MCPs — OAuth on first use:"
+    echo "    Each one opens your browser the first time you call a tool."
+    echo "    Sign in with your existing account (Figma, Excalidraw.com, Gamma)"
+    echo "    and approve access — subsequent calls are seamless."
     echo ""
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
