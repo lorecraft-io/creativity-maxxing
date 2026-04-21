@@ -203,10 +203,11 @@ Common multi-tool patterns:
 Not specific to this repo, but used constantly with these tools (from `cli-maxxing`):
 
 ```
-cc          # launch Claude Code
+cskip       # launch Claude Code with all permissions skipped (daily driver)
+cc          # launch Claude Code (normal mode)
 ccr         # Claude Code, resume last session
 ccc         # Claude Code in continuous mode
-cbrain      # open the 2ndBrain vault context
+cbrain      # open the 2ndBrain vault context (requires 2ndBrain-mogging)
 ```
 
 ---
