@@ -61,6 +61,18 @@ an unvalidated download URL, etc.), open a private advisory on the
 GitHub repository or email the maintainer listed on the org profile.
 **Do not** file a public issue for credential-exfiltration class bugs.
 
+## Supply-chain pinning
+
+Third-party skill downloads are pinned to a specific commit SHA (not a mutable
+branch ref like `main`) and verified against a SHA-256 digest before being
+written to disk. This applies to:
+
+- `design/install.sh` — UI/UX Pro Max skill from `nextlevelbuilder/ui-ux-pro-max-skill`
+
+To update a pinned dependency: fetch the new commit SHA from the upstream repo,
+download the file, compute `shasum -a 256`, then update both `*_COMMIT` and
+`*_SHA256` in the relevant installer. Never update only one of the two values.
+
 ## Install-script expectations
 
 Both `install.sh` and `uninstall.sh` in this repo:
@@ -71,6 +83,7 @@ Both `install.sh` and `uninstall.sh` in this repo:
 - never auto-download a binary without HTTPS
 - prompt before touching `ffmpeg` during uninstall because it is
   frequently system-shared with non-creative tooling
+- pin third-party skill downloads to a commit SHA with SHA-256 integrity check
 
 If you modify a module script, re-run `bash -n design/install.sh media/install.sh`
 and `shellcheck design/install.sh media/install.sh install.sh uninstall.sh update.sh` before merging.

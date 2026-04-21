@@ -60,12 +60,30 @@ install_uiux_skill() {
     info "Installing UI/UX Pro Max Skill..."
     mkdir -p "$SKILL_DIR"
 
-    SKILL_URL="https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/main/CLAUDE.md"
-    curl -fsSL "$SKILL_URL" -o "$SKILL_DIR/SKILL.md" 2>/dev/null
+    # Pinned to a specific commit SHA — prevents rug-pull via mutable branch ref.
+    # To update: change UIUX_COMMIT to the new SHA and update UIUX_SHA256 to match.
+    UIUX_COMMIT="b7e3af80f6e331f6fb456667b82b12cade7c9d35"
+    SKILL_URL="https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/${UIUX_COMMIT}/CLAUDE.md"
+    UIUX_SHA256="1c8b62068136ce3af4f6fe8d990a7da79b7ec6fd837c760b5ded4833b9756779"
 
-    if [ -f "$SKILL_DIR/SKILL.md" ] && [ -s "$SKILL_DIR/SKILL.md" ]; then
+    SKILL_TMP="$SKILL_DIR/SKILL.md.tmp"
+    if curl -fsSL "$SKILL_URL" -o "$SKILL_TMP" 2>/dev/null && [ -s "$SKILL_TMP" ]; then
+        # Verify integrity before accepting the file
+        _sha=""
+        if command -v shasum &>/dev/null; then
+            _sha=$(shasum -a 256 "$SKILL_TMP" | cut -d' ' -f1)
+        elif command -v sha256sum &>/dev/null; then
+            _sha=$(sha256sum "$SKILL_TMP" | cut -d' ' -f1)
+        fi
+        if [ -n "$_sha" ] && [ "$_sha" != "$UIUX_SHA256" ]; then
+            rm -f "$SKILL_TMP"
+            soft_fail "UI/UX Pro Max skill sha256 mismatch — skipping install (possible tamper)"
+            return
+        fi
+        mv "$SKILL_TMP" "$SKILL_DIR/SKILL.md"
         success "UI/UX Pro Max Skill installed at $SKILL_DIR"
     else
+        rm -f "$SKILL_TMP"
         soft_fail "Could not download skill file. Install manually from: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
     fi
 }
