@@ -115,6 +115,18 @@ Everything else installs with zero accounts and zero keys.
 
 All targets are **idempotent**: check-and-skip if the target already exists.
 
+### Also worth flipping on — claude.ai connectors
+
+These live on claude.ai's hosted side (Settings → Connectors), not in this install script. Enable them there and they show up automatically in any Claude session alongside everything above. No local config, no keys, just a toggle + OAuth:
+
+| Tool | What it does |
+|------|--------------|
+| [**Figma**](https://claude.ai) | Read Figma files, inspect frames, export design tokens, and convert designs to code. Paste any figma.com URL into Claude and it just resolves. Pair with `taste-skill` + `21st.dev Magic` to go from a frame to a working component in one loop. |
+| [**Excalidraw**](https://claude.ai) | Generate and edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. Great for system sketches, flowcharts, whiteboard sessions. |
+| [**Gamma**](https://claude.ai) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context — Claude already knows what "looks expensive" and Gamma renders it. |
+
+To enable: open [claude.ai](https://claude.ai) → click your avatar → **Settings** → **Connectors** → find each one → **Connect**. One OAuth click per tool. No CLI touch needed.
+
 ---
 
 ## How I actually use each piece
