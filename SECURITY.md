@@ -72,5 +72,5 @@ Both `install.sh` and `uninstall.sh` in this repo:
 - prompt before touching `ffmpeg` during uninstall because it is
   frequently system-shared with non-creative tooling
 
-If you modify a step script, re-run `bash -n step-{4,5}/step-*-install.sh`
-and `shellcheck` before merging.
+If you modify a module script, re-run `bash -n design/install.sh media/install.sh`
+and `shellcheck design/install.sh media/install.sh install.sh uninstall.sh update.sh` before merging.

@@ -65,7 +65,7 @@ install_remotion_skills() {
     else
         npx skills add remotion-dev/skills --yes 2>/dev/null
 
-        if [ -d ".agents/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
+        if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
             success "Remotion skills installed"
         else
             soft_fail "Remotion skills installation could not be verified"
@@ -230,11 +230,18 @@ install_whisper_cpp() {
             sudo apt-get install -y -qq whisper-cpp 2>/dev/null || {
                 info "whisper-cpp not in apt — building from source..."
                 if command -v cmake &>/dev/null && command -v g++ &>/dev/null; then
-                    git clone https://github.com/ggerganov/whisper.cpp.git /tmp/whisper-cpp-build 2>/dev/null \
-                        && cd /tmp/whisper-cpp-build && cmake -B build && cmake --build build --config Release \
-                        && sudo cp build/bin/whisper-cli /usr/local/bin/whisper-cpp 2>/dev/null \
-                        && cd - >/dev/null && rm -rf /tmp/whisper-cpp-build \
-                        || { soft_fail "whisper-cpp build failed"; return; }
+                    if git clone https://github.com/ggerganov/whisper.cpp.git /tmp/whisper-cpp-build 2>/dev/null; then
+                        if (cd /tmp/whisper-cpp-build && cmake -B build && cmake --build build --config Release && sudo cp build/bin/whisper-cli /usr/local/bin/whisper-cpp 2>/dev/null); then
+                            rm -rf /tmp/whisper-cpp-build
+                        else
+                            rm -rf /tmp/whisper-cpp-build
+                            soft_fail "whisper-cpp build failed"
+                            return
+                        fi
+                    else
+                        soft_fail "whisper-cpp clone failed"
+                        return
+                    fi
                 else
                     soft_fail "whisper-cpp requires cmake and g++ to build from source"
                     return
@@ -313,7 +320,7 @@ run_self_test() {
     TEST_FAIL=0
 
     # Remotion skills
-    if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ] || [ -d ".agents/skills/remotion-best-practices" ]; then
+    if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then
         success "TEST: Remotion skills installed"
         TEST_PASS=$((TEST_PASS + 1))
     else

@@ -12,9 +12,17 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+REMOVED=0
+SKIPPED=0
+
 info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 success() { echo -e "${GREEN}[OK]${NC} $1"; }
 warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
+
+# Track a removed item
+removed_one() { REMOVED=$((REMOVED + 1)); success "$1"; }
+# Track a skipped item (not present)
+skipped_one() { SKIPPED=$((SKIPPED + 1)); info "$1"; }
 
 # -----------------------------------------------------------------------------
 # Remove UI/UX Pro Max skill
@@ -23,14 +31,14 @@ remove_uiux_skill() {
     local SKILL_DIR="$HOME/.claude/skills/ui-ux-pro-max"
     if [ -d "$SKILL_DIR" ] || [ -L "$SKILL_DIR" ]; then
         rm -rf "$SKILL_DIR"
-        success "Removed UI/UX Pro Max skill"
+        removed_one "Removed UI/UX Pro Max skill"
     else
-        info "UI/UX Pro Max skill not present"
+        skipped_one "UI/UX Pro Max skill not present"
     fi
 }
 
 # -----------------------------------------------------------------------------
-# Remove all 7 Taste Skill variants
+# Remove all 8 Taste Skill variants
 # -----------------------------------------------------------------------------
 remove_taste_skills() {
     local variants=(
@@ -43,15 +51,19 @@ remove_taste_skills() {
         "stitch-design-taste"
         "gpt-taste"
     )
-    local removed=0
+    local r=0 s=0
     for v in "${variants[@]}"; do
         local dir="$HOME/.claude/skills/$v"
         if [ -d "$dir" ] || [ -L "$dir" ]; then
             rm -rf "$dir"
-            removed=$((removed + 1))
+            r=$((r + 1))
+        else
+            s=$((s + 1))
         fi
     done
-    success "Removed $removed Taste Skill variant(s)"
+    REMOVED=$((REMOVED + r))
+    SKIPPED=$((SKIPPED + s))
+    success "Taste Skills: removed $r, skipped $s (already absent)"
 }
 
 # -----------------------------------------------------------------------------
@@ -78,6 +90,48 @@ remove_canva_mcp() {
             success "Removed Canva MCP"
         else
             info "Canva MCP not registered"
+        fi
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove Figma MCP
+# -----------------------------------------------------------------------------
+remove_figma_mcp() {
+    if command -v claude >/dev/null 2>&1; then
+        if claude mcp list 2>/dev/null | grep -qi "figma"; then
+            claude mcp remove figma 2>/dev/null || true
+            success "Removed Figma MCP"
+        else
+            info "Figma MCP not registered"
+        fi
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove Excalidraw MCP
+# -----------------------------------------------------------------------------
+remove_excalidraw_mcp() {
+    if command -v claude >/dev/null 2>&1; then
+        if claude mcp list 2>/dev/null | grep -qi "excalidraw"; then
+            claude mcp remove excalidraw 2>/dev/null || true
+            success "Removed Excalidraw MCP"
+        else
+            info "Excalidraw MCP not registered"
+        fi
+    fi
+}
+
+# -----------------------------------------------------------------------------
+# Remove Gamma MCP
+# -----------------------------------------------------------------------------
+remove_gamma_mcp() {
+    if command -v claude >/dev/null 2>&1; then
+        if claude mcp list 2>/dev/null | grep -qi "gamma"; then
+            claude mcp remove gamma 2>/dev/null || true
+            success "Removed Gamma MCP"
+        else
+            info "Gamma MCP not registered"
         fi
     fi
 }
@@ -201,6 +255,9 @@ main() {
     remove_taste_skills
     remove_magic_mcp
     remove_canva_mcp
+    remove_figma_mcp
+    remove_excalidraw_mcp
+    remove_gamma_mcp
     remove_higgsfield_skills
     remove_remotion_skills
     remove_youtube_transcript_mcp

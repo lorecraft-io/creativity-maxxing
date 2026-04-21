@@ -65,6 +65,39 @@ Conversational design inside the terminal. OAuth once, then just ask:
 "Import this screenshot as a new Canva design: <url>"
 ```
 
+### Figma MCP
+
+Paste any Figma URL and read files, inspect frames, export tokens, convert to code. OAuth once.
+
+```
+"Read this Figma file: https://www.figma.com/design/XXXX/..."
+"Get the design context for node <node-id> in file <file-key>."
+"Export the design tokens from this Figma file."
+"Convert this Figma frame to React + Tailwind."
+"Search the design system for 'button' components."
+```
+
+### Excalidraw MCP
+
+Generate and save Excalidraw diagrams conversationally. OAuth once.
+
+```
+"Draw the architecture of a three-tier web app as an Excalidraw diagram."
+"Export this diagram to .excalidraw format."
+"Add a new node to my saved diagram checkpoint."
+```
+
+### Gamma MCP
+
+Generate presentations, docs, and landing pages from a prompt. OAuth once.
+
+```
+"Generate a presentation about the creativity-maxxing install stack."
+"Create a one-page doc summarizing our transcription pipeline."
+"List my Gamma folders."
+"What themes are available in Gamma?"
+```
+
 ---
 
 ## Video prompts (Higgsfield / Seedance 2.0)

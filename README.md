@@ -26,7 +26,7 @@ design, video, audio, transcription in one install.**
 | [Manual steps](#manual-steps-oauth--accounts) | Setup | The 2-3 tools that want an OAuth click or API key | ~1 min |
 | [What gets installed](#what-gets-installed) | Reference | Table of every skill / MCP / binary | ~1 min |
 | [How I use each piece](#how-i-actually-use-each-piece) | Context | The reason each tool is in the box | ~3 min |
-| [Taste skills](#taste-skills) | Reference | 7 variants, 3 knobs, when to pick which | ~2 min |
+| [Taste skills](#taste-skills) | Reference | 8 variants, 3 knobs, when to pick which | ~2 min |
 | [Update](#update) | Maintenance | Pull the latest without reinstalling | — |
 | [Uninstall](#uninstall) | Maintenance | Reverse everything, prompt before touching `ffmpeg` | — |
 | [The maxxing series](#the-maxxing-series) | Meta | Sibling repos: cli-maxxing + task-maxxing | — |
@@ -90,6 +90,9 @@ A few of the tools need an extra click after the installer runs. The script prin
 |------|--------------------|
 | **21st.dev Magic MCP** | Sign up free at [21st.dev](https://21st.dev), grab your API key, follow their MCP setup one-liner |
 | **Canva MCP** | First time you call it, Claude opens a browser for Canva OAuth — allow, done |
+| **Figma MCP** | First call opens browser for Figma OAuth — sign in with your Figma account, allow, done |
+| **Excalidraw MCP** | First call opens browser for Excalidraw OAuth — sign in, allow, done |
+| **Gamma MCP** | First call opens browser for Gamma OAuth — sign in with your Gamma account, allow, done |
 | **Morgen / Notion / Motion** | Not in this repo — those live in `cli-maxxing` |
 
 Everything else installs with zero accounts and zero keys.
@@ -196,7 +199,7 @@ Or, from a clone:
 bash uninstall.sh
 ```
 
-Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp. **Prompts before touching `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
+Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp. **Prompts before touching `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
 
 ---
 
