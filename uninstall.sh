@@ -137,6 +137,20 @@ remove_gamma_mcp() {
 }
 
 # -----------------------------------------------------------------------------
+# Remove Playwright MCP
+# -----------------------------------------------------------------------------
+remove_playwright_mcp() {
+    if command -v claude >/dev/null 2>&1; then
+        if claude mcp list 2>/dev/null | grep -q "playwright"; then
+            claude mcp remove playwright 2>/dev/null || true
+            removed_one "Removed Playwright MCP"
+        else
+            skipped_one "Playwright MCP not registered"
+        fi
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Remove Higgsfield / Seedance 2.0 prompt skills
 # -----------------------------------------------------------------------------
 remove_higgsfield_skills() {
@@ -286,6 +300,7 @@ main() {
     remove_figma_mcp
     remove_excalidraw_mcp
     remove_gamma_mcp
+    remove_playwright_mcp
     remove_higgsfield_skills
     remove_remotion_skills
     remove_youtube_transcript_mcp

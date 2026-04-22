@@ -98,6 +98,16 @@ Generate presentations, docs, and landing pages from a prompt. OAuth once.
 "What themes are available in Gamma?"
 ```
 
+### Playwright MCP
+
+Microsoft's browser automation MCP. Let Claude log into and operate any web app that has no API — Higgsfield, niche SaaS tools, anything you'd normally click through. No credentials needed. First run downloads Chromium automatically.
+
+```
+"Log into Higgsfield and generate a video for me."
+"Open this URL, fill in the form, and tell me what the response says."
+"Take a screenshot of the dashboard after logging in."
+```
+
 ---
 
 ## Video prompts (Higgsfield / Seedance 2.0)

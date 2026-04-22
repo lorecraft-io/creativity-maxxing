@@ -118,8 +118,9 @@ Everything else installs with zero accounts and zero keys.
 | Figma | MCP server (HTTP, OAuth) | Read Figma files, inspect frames, export design tokens, convert designs to code. Paste any figma.com URL and it resolves. |
 | Excalidraw | MCP server (HTTP, OAuth) | Generate + edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. |
 | Gamma | MCP server (HTTP, OAuth) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. |
+| Playwright MCP | MCP server | Microsoft's official browser automation — lets Claude log into and operate web apps with no API (Higgsfield, niche SaaS, anything you'd normally click through). |
 
-All targets are **idempotent** — the install script checks and skips if already present. Figma, Excalidraw, Gamma (and Canva above) install as remote HTTP MCPs — the script registers them; first tool call opens your browser for a one-time OAuth.
+All targets are **idempotent** — the install script checks and skips if already present. Figma, Excalidraw, Gamma (and Canva above) install as remote HTTP MCPs — the script registers them; first tool call opens your browser for a one-time OAuth. Playwright installs as a local npx MCP — no credentials needed.
 
 ---
 
@@ -199,7 +200,7 @@ Or, from a clone:
 bash uninstall.sh
 ```
 
-Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp, ffmpeg. **Prompts before removing `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
+Removes, in reverse order: UI/UX Pro Max, all 8 taste variants, 21st.dev Magic MCP, Canva MCP, Figma MCP, Excalidraw MCP, Gamma MCP, Playwright MCP, Higgsfield/Seedance skills, Remotion skills, YouTube Transcript MCP, yt-dlp MCP, yt-dlp CLI, whisper-cpp, whisper-mcp, ffmpeg. **Prompts before removing `ffmpeg`** because ffmpeg is usually shared with non-creative tooling — answer `N` to keep it.
 
 ---
 

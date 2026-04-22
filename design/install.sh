@@ -230,6 +230,33 @@ install_excalidraw_mcp() { install_remote_http_mcp "Excalidraw" "excalidraw" "ht
 install_gamma_mcp()      { install_remote_http_mcp "Gamma"      "gamma"      "https://mcp.gamma.app/mcp"; }
 
 # -----------------------------------------------------------------------------
+# Install Playwright MCP (Microsoft's official browser automation)
+# No credentials needed. Use case: let Claude operate web apps that have no API.
+# Idempotent — same check used by cli-maxxing; safe if both repos are installed.
+# -----------------------------------------------------------------------------
+install_playwright() {
+    if claude mcp list 2>/dev/null | grep -q "playwright" 2>/dev/null; then
+        success "Playwright MCP already configured"
+        return
+    fi
+
+    info "Adding Playwright MCP (Microsoft @playwright/mcp) to Claude Code..."
+    echo ""
+    echo -e "${BLUE}  Playwright lets Claude log into and operate web apps with no API.${NC}"
+    echo -e "${BLUE}  Great for: Higgsfield, niche SaaS, any site you'd normally click through.${NC}"
+    echo -e "${BLUE}  Runs a separate Chromium instance — first launch auto-downloads it.${NC}"
+    echo ""
+
+    claude mcp add playwright -- npx -y @playwright/mcp@latest 2>/dev/null
+
+    if claude mcp list 2>/dev/null | grep -q "playwright" 2>/dev/null; then
+        success "Playwright MCP configured"
+    else
+        soft_fail "Playwright MCP install could not be verified — add manually: claude mcp add playwright -- npx -y @playwright/mcp@latest"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Self-test
 # -----------------------------------------------------------------------------
 run_self_test() {
@@ -300,6 +327,14 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
+    if claude mcp list 2>/dev/null | grep -q "playwright" 2>/dev/null; then
+        success "TEST: Playwright MCP configured"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        warn "TEST: Playwright MCP not configured"
+        TEST_FAIL=$((TEST_FAIL + 1))
+    fi
+
     echo ""
     if [ "$TEST_FAIL" -eq 0 ]; then
         echo -e "  ${GREEN}All $TEST_PASS tests passed.${NC}"
@@ -334,6 +369,7 @@ print_summary() {
     echo "    Figma MCP        $(claude mcp list 2>/dev/null | grep -qi 'figma' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
     echo "    Excalidraw MCP   $(claude mcp list 2>/dev/null | grep -qi 'excalidraw' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
     echo "    Gamma MCP        $(claude mcp list 2>/dev/null | grep -qi 'gamma' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Playwright MCP   $(claude mcp list 2>/dev/null | grep -q 'playwright' && echo 'configured' || echo '—')"
     echo ""
     echo "  Taste Skill variants (installed names / slash commands):"
     echo "    - /design-taste-frontend       (default premium frontend rules, 3 knobs)"
@@ -386,7 +422,7 @@ main() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BLUE}  Design Module${NC}"
-    echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva + Figma + Excalidraw + Gamma${NC}"
+    echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva + Figma + Excalidraw + Gamma + Playwright${NC}"
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
@@ -399,6 +435,7 @@ main() {
     install_figma_mcp
     install_excalidraw_mcp
     install_gamma_mcp
+    install_playwright
     run_self_test
     print_summary
 }

@@ -15,7 +15,7 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "  Design module:"
 echo "    UI/UX Pro Max skill · 8× Taste Skills · 21st.dev Magic MCP"
-echo "    Canva MCP · Figma MCP · Excalidraw MCP · Gamma MCP"
+echo "    Canva MCP · Figma MCP · Excalidraw MCP · Gamma MCP · Playwright MCP"
 echo ""
 echo "  Media module:"
 echo "    Remotion skill · 15× Higgsfield/Seedance skills"
