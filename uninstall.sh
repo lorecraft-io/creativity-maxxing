@@ -71,7 +71,7 @@ remove_taste_skills() {
 # -----------------------------------------------------------------------------
 remove_magic_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -q "magic"; then
+        if claude mcp list 2>/dev/null | grep -qE '^magic:'; then
             claude mcp remove magic 2>/dev/null || true
             removed_one "Removed 21st.dev Magic MCP"
         else
@@ -85,7 +85,7 @@ remove_magic_mcp() {
 # -----------------------------------------------------------------------------
 remove_canva_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -qi "canva"; then
+        if claude mcp list 2>/dev/null | grep -qE '^canva:'; then
             claude mcp remove canva 2>/dev/null || true
             removed_one "Removed Canva MCP"
         else
@@ -99,7 +99,7 @@ remove_canva_mcp() {
 # -----------------------------------------------------------------------------
 remove_figma_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -qi "figma"; then
+        if claude mcp list 2>/dev/null | grep -qE '^figma:'; then
             claude mcp remove figma 2>/dev/null || true
             removed_one "Removed Figma MCP"
         else
@@ -113,7 +113,7 @@ remove_figma_mcp() {
 # -----------------------------------------------------------------------------
 remove_excalidraw_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -qi "excalidraw"; then
+        if claude mcp list 2>/dev/null | grep -qE '^excalidraw:'; then
             claude mcp remove excalidraw 2>/dev/null || true
             removed_one "Removed Excalidraw MCP"
         else
@@ -127,7 +127,7 @@ remove_excalidraw_mcp() {
 # -----------------------------------------------------------------------------
 remove_gamma_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -qi "gamma"; then
+        if claude mcp list 2>/dev/null | grep -qE '^gamma:'; then
             claude mcp remove gamma 2>/dev/null || true
             removed_one "Removed Gamma MCP"
         else
@@ -141,7 +141,7 @@ remove_gamma_mcp() {
 # -----------------------------------------------------------------------------
 remove_playwright_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -q "playwright"; then
+        if claude mcp list 2>/dev/null | grep -qE '^playwright:'; then
             claude mcp remove playwright 2>/dev/null || true
             removed_one "Removed Playwright MCP"
         else
@@ -194,7 +194,7 @@ remove_remotion_skills() {
 # -----------------------------------------------------------------------------
 remove_youtube_transcript_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
+        if claude mcp list 2>/dev/null | grep -qE '^youtube-transcript:'; then
             claude mcp remove youtube-transcript 2>/dev/null || true
             removed_one "Removed YouTube Transcript MCP"
         else
@@ -208,7 +208,7 @@ remove_youtube_transcript_mcp() {
 # -----------------------------------------------------------------------------
 remove_ytdlp_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
+        if claude mcp list 2>/dev/null | grep -qE '^yt-dlp:'; then
             claude mcp remove yt-dlp 2>/dev/null || true
             removed_one "Removed yt-dlp MCP"
         else
@@ -246,8 +246,8 @@ remove_whisper_cpp() {
 # -----------------------------------------------------------------------------
 remove_whisper_mcp() {
     if command -v claude >/dev/null 2>&1; then
-        if claude mcp list 2>/dev/null | grep -q "whisper"; then
-            claude mcp remove whisper-mcp 2>/dev/null || claude mcp remove whisper 2>/dev/null || true
+        if claude mcp list 2>/dev/null | grep -qE '^whisper-mcp:'; then
+            claude mcp remove whisper-mcp 2>/dev/null || true
             removed_one "Removed whisper-mcp"
         else
             skipped_one "whisper-mcp not registered"

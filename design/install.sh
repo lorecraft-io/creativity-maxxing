@@ -148,7 +148,7 @@ install_taste_skill() {
 # Install 21st.dev Magic MCP
 # -----------------------------------------------------------------------------
 install_21st_magic() {
-    if claude mcp list 2>/dev/null | grep -qi "magic\|21st" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^magic:' 2>/dev/null; then
         success "21st.dev Magic MCP already configured"
         return
     fi
@@ -157,7 +157,7 @@ install_21st_magic() {
     npx -y @anthropic-ai/claude-code mcp add magic -- npx -y @21st-dev/magic@latest 2>/dev/null \
         || claude mcp add magic -- npx -y @21st-dev/magic@latest 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -qi "magic\|21st" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^magic:' 2>/dev/null; then
         success "21st.dev Magic MCP configured"
     else
         warn "Could not auto-configure Magic MCP. You may need to set it up manually."
@@ -174,7 +174,7 @@ install_21st_magic() {
 # Install Canva MCP (remote, OAuth on first use)
 # -----------------------------------------------------------------------------
 install_canva_mcp() {
-    if claude mcp list 2>/dev/null | grep -qi "canva" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^canva:' 2>/dev/null; then
         success "Canva MCP already configured"
         return
     fi
@@ -187,7 +187,7 @@ install_canva_mcp() {
         || claude mcp add --transport http canva https://mcp.canva.com/mcp 2>/dev/null \
         || claude mcp add --scope user --transport sse canva https://mcp.canva.com/mcp 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -qi "canva" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^canva:' 2>/dev/null; then
         success "Canva MCP configured — first call will open a browser for OAuth"
     else
         soft_fail "Canva MCP install could not be verified — add manually: claude mcp add --scope user --transport http canva https://mcp.canva.com/mcp"
@@ -207,7 +207,7 @@ install_remote_http_mcp() {
 
     # Idempotency check — `claude mcp list` prints one MCP per line as "<name>: <url>"
     # so a case-insensitive substring match on the server name is enough.
-    if claude mcp list 2>/dev/null | grep -qi "$server" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE "^${server}:" 2>/dev/null; then
         success "${label} MCP already configured"
         return
     fi
@@ -218,7 +218,7 @@ install_remote_http_mcp() {
         || claude mcp add --transport http "$server" "$url" 2>/dev/null \
         || claude mcp add --scope user --transport sse "$server" "$url" 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -qi "$server" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE "^${server}:" 2>/dev/null; then
         success "${label} MCP configured — first call will open a browser for OAuth"
     else
         soft_fail "${label} MCP install could not be verified — add manually: claude mcp add --scope user --transport http ${server} ${url}"
@@ -235,7 +235,7 @@ install_gamma_mcp()      { install_remote_http_mcp "Gamma"      "gamma"      "ht
 # Idempotent — same check used by cli-maxxing; safe if both repos are installed.
 # -----------------------------------------------------------------------------
 install_playwright() {
-    if claude mcp list 2>/dev/null | grep -q "playwright" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^playwright:' 2>/dev/null; then
         success "Playwright MCP already configured"
         return
     fi
@@ -249,7 +249,7 @@ install_playwright() {
 
     claude mcp add playwright -- npx -y @playwright/mcp@latest 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -q "playwright" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^playwright:' 2>/dev/null; then
         success "Playwright MCP configured"
     else
         soft_fail "Playwright MCP install could not be verified — add manually: claude mcp add playwright -- npx -y @playwright/mcp@latest"
@@ -287,7 +287,7 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -qi "magic\|21st" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^magic:' 2>/dev/null; then
         success "TEST: 21st.dev Magic MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -295,7 +295,7 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -qi "canva" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^canva:' 2>/dev/null; then
         success "TEST: Canva MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -303,7 +303,7 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -qi "figma" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^figma:' 2>/dev/null; then
         success "TEST: Figma MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -311,7 +311,7 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -qi "excalidraw" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^excalidraw:' 2>/dev/null; then
         success "TEST: Excalidraw MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -319,7 +319,7 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -qi "gamma" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^gamma:' 2>/dev/null; then
         success "TEST: Gamma MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -327,7 +327,7 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -q "playwright" 2>/dev/null; then
+    if claude mcp list 2>/dev/null | grep -qE '^playwright:' 2>/dev/null; then
         success "TEST: Playwright MCP configured"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -364,12 +364,12 @@ print_summary() {
     else
         echo "    Taste Skill      $taste_count/8 variants (partial)"
     fi
-    echo "    21st.dev Magic   $(claude mcp list 2>/dev/null | grep -qi 'magic\|21st' && echo 'configured' || echo 'needs manual setup')"
-    echo "    Canva MCP        $(claude mcp list 2>/dev/null | grep -qi 'canva' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
-    echo "    Figma MCP        $(claude mcp list 2>/dev/null | grep -qi 'figma' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
-    echo "    Excalidraw MCP   $(claude mcp list 2>/dev/null | grep -qi 'excalidraw' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
-    echo "    Gamma MCP        $(claude mcp list 2>/dev/null | grep -qi 'gamma' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
-    echo "    Playwright MCP   $(claude mcp list 2>/dev/null | grep -q 'playwright' && echo 'configured' || echo '—')"
+    echo "    21st.dev Magic   $(claude mcp list 2>/dev/null | grep -qE '^magic:' && echo 'configured' || echo 'needs manual setup')"
+    echo "    Canva MCP        $(claude mcp list 2>/dev/null | grep -qE '^canva:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Figma MCP        $(claude mcp list 2>/dev/null | grep -qE '^figma:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Excalidraw MCP   $(claude mcp list 2>/dev/null | grep -qE '^excalidraw:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Gamma MCP        $(claude mcp list 2>/dev/null | grep -qE '^gamma:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    echo "    Playwright MCP   $(claude mcp list 2>/dev/null | grep -qE '^playwright:' && echo 'configured' || echo '—')"
     echo ""
     echo "  Taste Skill variants (installed names / slash commands):"
     echo "    - /design-taste-frontend       (default premium frontend rules, 3 knobs)"

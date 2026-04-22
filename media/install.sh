@@ -153,14 +153,14 @@ install_higgsfield_skills() {
 install_youtube_transcript() {
     info "Installing YouTube Transcript MCP server..."
 
-    if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
+    if claude mcp list 2>/dev/null | grep -qE '^youtube-transcript:'; then
         success "YouTube Transcript MCP already installed"
         return
     fi
 
     claude mcp add --scope user youtube-transcript -- npx -y @kimtaeyoon83/mcp-server-youtube-transcript 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
+    if claude mcp list 2>/dev/null | grep -qE '^youtube-transcript:'; then
         success "YouTube Transcript MCP installed"
     else
         soft_fail "YouTube Transcript MCP installation could not be verified"
@@ -173,14 +173,14 @@ install_youtube_transcript() {
 install_ytdlp_mcp() {
     info "Installing yt-dlp MCP server..."
 
-    if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
+    if claude mcp list 2>/dev/null | grep -qE '^yt-dlp:'; then
         success "yt-dlp MCP already installed"
         return
     fi
 
     claude mcp add --scope user yt-dlp -- npx -y @kevinwatt/yt-dlp-mcp@latest 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
+    if claude mcp list 2>/dev/null | grep -qE '^yt-dlp:'; then
         success "yt-dlp MCP installed"
     else
         soft_fail "yt-dlp MCP installation could not be verified"
@@ -266,14 +266,14 @@ install_whisper_cpp() {
 install_whisper_mcp() {
     info "Installing Whisper MCP server..."
 
-    if claude mcp list 2>/dev/null | grep -q "whisper-mcp"; then
+    if claude mcp list 2>/dev/null | grep -qE '^whisper-mcp:'; then
         success "Whisper MCP already installed"
         return
     fi
 
     claude mcp add --scope user whisper-mcp -- npx -y whisper-mcp 2>/dev/null
 
-    if claude mcp list 2>/dev/null | grep -q "whisper-mcp"; then
+    if claude mcp list 2>/dev/null | grep -qE '^whisper-mcp:'; then
         success "Whisper MCP installed"
     else
         soft_fail "Whisper MCP installation could not be verified"
@@ -349,7 +349,7 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -q "youtube-transcript"; then
+    if claude mcp list 2>/dev/null | grep -qE '^youtube-transcript:'; then
         success "TEST: YouTube Transcript MCP registered"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -357,7 +357,7 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -q "yt-dlp"; then
+    if claude mcp list 2>/dev/null | grep -qE '^yt-dlp:'; then
         success "TEST: yt-dlp MCP registered"
         TEST_PASS=$((TEST_PASS + 1))
     else
@@ -381,7 +381,7 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -q "whisper-mcp"; then
+    if claude mcp list 2>/dev/null | grep -qE '^whisper-mcp:'; then
         success "TEST: Whisper MCP registered"
         TEST_PASS=$((TEST_PASS + 1))
     else
