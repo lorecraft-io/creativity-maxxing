@@ -226,7 +226,7 @@ install_remote_http_mcp() {
 }
 
 install_figma_mcp()      { install_remote_http_mcp "Figma"      "figma"      "https://mcp.figma.com/mcp"; }
-install_excalidraw_mcp() { install_remote_http_mcp "Excalidraw" "excalidraw" "https://mcp.excalidraw.com/mcp"; }
+install_excalidraw_mcp() { install_remote_http_mcp "Excalidraw" "excalidraw" "https://mcp.excalidraw.com"; }
 install_gamma_mcp()      { install_remote_http_mcp "Gamma"      "gamma"      "https://mcp.gamma.app/mcp"; }
 
 # -----------------------------------------------------------------------------
