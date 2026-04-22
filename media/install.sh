@@ -316,8 +316,8 @@ run_self_test() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
-    TEST_PASS=0
-    TEST_FAIL=0
+    local TEST_PASS=0
+    local TEST_FAIL=0
 
     # Remotion skills
     if [ -d "$HOME/.claude/skills/remotion-best-practices" ] || [ -L "$HOME/.claude/skills/remotion-best-practices" ]; then

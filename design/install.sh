@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
 # =============================================================================
 # creativity-maxxing — Design module
@@ -50,7 +50,7 @@ verify_prerequisites() {
 # Install UI/UX Pro Max Skill
 # -----------------------------------------------------------------------------
 install_uiux_skill() {
-    SKILL_DIR="$HOME/.claude/skills/ui-ux-pro-max"
+    local SKILL_DIR="$HOME/.claude/skills/ui-ux-pro-max"
 
     if [ -f "$SKILL_DIR/SKILL.md" ]; then
         success "UI/UX Pro Max Skill already installed"
@@ -62,14 +62,14 @@ install_uiux_skill() {
 
     # Pinned to a specific commit SHA — prevents rug-pull via mutable branch ref.
     # To update: change UIUX_COMMIT to the new SHA and update UIUX_SHA256 to match.
-    UIUX_COMMIT="b7e3af80f6e331f6fb456667b82b12cade7c9d35"
-    SKILL_URL="https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/${UIUX_COMMIT}/CLAUDE.md"
-    UIUX_SHA256="1c8b62068136ce3af4f6fe8d990a7da79b7ec6fd837c760b5ded4833b9756779"
+    local UIUX_COMMIT="b7e3af80f6e331f6fb456667b82b12cade7c9d35"
+    local SKILL_URL="https://raw.githubusercontent.com/nextlevelbuilder/ui-ux-pro-max-skill/${UIUX_COMMIT}/CLAUDE.md"
+    local UIUX_SHA256="1c8b62068136ce3af4f6fe8d990a7da79b7ec6fd837c760b5ded4833b9756779"
 
-    SKILL_TMP="$SKILL_DIR/SKILL.md.tmp"
+    local SKILL_TMP="$SKILL_DIR/SKILL.md.tmp"
     if curl -fsSL "$SKILL_URL" -o "$SKILL_TMP" 2>/dev/null && [ -s "$SKILL_TMP" ]; then
         # Verify integrity before accepting the file
-        _sha=""
+        local _sha=""
         if command -v shasum &>/dev/null; then
             _sha=$(shasum -a 256 "$SKILL_TMP" | cut -d' ' -f1)
         elif command -v sha256sum &>/dev/null; then
@@ -266,8 +266,8 @@ run_self_test() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
-    TEST_PASS=0
-    TEST_FAIL=0
+    local TEST_PASS=0
+    local TEST_FAIL=0
 
     if [ -f "$HOME/.claude/skills/ui-ux-pro-max/SKILL.md" ]; then
         success "TEST: UI/UX Pro Max Skill installed"
