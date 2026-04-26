@@ -15,6 +15,18 @@ NC='\033[0m'
 
 ERRORS=0
 
+# Opt-out flags. Parse ARGV before main() runs.
+NO_WHISPER_MODEL=0
+for _arg in "$@"; do
+    case "$_arg" in
+        --no-whisper-model) NO_WHISPER_MODEL=1 ;;
+        *) ;;
+    esac
+done
+
+# Default whisper model status; updated by install_whisper_model_basen().
+WHISPER_MODEL_STATUS="UNKNOWN"
+
 info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 success() { echo -e "${GREEN}[OK]${NC} $1"; }
 warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
@@ -45,6 +57,21 @@ verify_prerequisites() {
         fail "Claude Code not found. Install cli-maxxing first."
     fi
     success "Prerequisites verified"
+}
+
+# -----------------------------------------------------------------------------
+# Preflight: detect root-owned ~/.npm files (legacy `sudo npm install` damage)
+# Cross-repo consistent wording with 2ndBrain-mogging — every install on a
+# poisoned cache fails the same way and prints the same fix. Fail-loud, no
+# silent retries (npx swallows the EACCES and Whisper / yt-dlp MCPs end up
+# half-installed without the user knowing).
+# -----------------------------------------------------------------------------
+preflight_npm_cache_ownership() {
+    if find "$HOME/.npm" -maxdepth 2 -user root -print -quit 2>/dev/null | grep -q .; then
+        fail "Root-owned files detected in ~/.npm — npx will fail silently. Fix:
+    sudo chown -R \$(whoami) ~/.npm
+Then re-run this installer."
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -281,6 +308,84 @@ install_whisper_mcp() {
 }
 
 # -----------------------------------------------------------------------------
+# Auto-fetch the whisper.cpp ggml-base.en model.
+#
+# Without this, every teammate hits the same first-call error:
+#   "model file not found: ~/.whisper/ggml-base.en.bin"
+# All three WAGMI install-call teammates needed manual `mkdir + curl` to fix.
+#
+# Source: https://huggingface.co/ggerganov/whisper.cpp (official upstream).
+# Size: ~141MB (147964211 bytes verified live 2026-04-25). HF only exposes an
+# LFS pointer SHA, not a content SHA256 — so we validate by minimum size
+# (>=100MB) instead of fabricating a checksum. Fail loud + remove the partial
+# file if the download is truncated.
+#
+# Skip via --no-whisper-model. HTTPS only. No shell injection — all paths are
+# fixed literals (no user input substituted into curl/rm).
+# -----------------------------------------------------------------------------
+install_whisper_model_basen() {
+    local MODEL_DIR="$HOME/.whisper"
+    local MODEL_FILE="$MODEL_DIR/ggml-base.en.bin"
+    local MODEL_URL="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin"
+    local MIN_SIZE=104857600  # 100 MB floor — real file is ~141MB
+
+    if [ "$NO_WHISPER_MODEL" = "1" ]; then
+        WHISPER_MODEL_STATUS="SKIPPED"
+        info "Whisper base.en model fetch skipped (--no-whisper-model)"
+        echo "    To install later: mkdir -p ~/.whisper && curl -fL \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
+        return
+    fi
+
+    mkdir -p "$MODEL_DIR"
+
+    if [ -f "$MODEL_FILE" ] && [ -s "$MODEL_FILE" ]; then
+        local _existing_size
+        if [ "$(uname -s)" = "Darwin" ]; then
+            _existing_size=$(stat -f%z "$MODEL_FILE" 2>/dev/null || echo 0)
+        else
+            _existing_size=$(stat -c%s "$MODEL_FILE" 2>/dev/null || echo 0)
+        fi
+        if [ "$_existing_size" -ge "$MIN_SIZE" ]; then
+            WHISPER_MODEL_STATUS="ALREADY-PRESENT"
+            success "Whisper base.en model already present (~$((_existing_size / 1024 / 1024))MB at $MODEL_FILE)"
+            return
+        fi
+        warn "Existing whisper model file is suspiciously small ($_existing_size bytes) — re-downloading"
+        rm -f "$MODEL_FILE"
+    fi
+
+    info "Fetching Whisper base.en model (~141MB) from huggingface.co..."
+    info "  Source: $MODEL_URL"
+    info "  Checksum: server-side LFS only (HuggingFace does not publish a content SHA256)"
+
+    if ! curl -fL --retry 2 --connect-timeout 15 "$MODEL_URL" -o "$MODEL_FILE" 2>/dev/null; then
+        rm -f "$MODEL_FILE"
+        WHISPER_MODEL_STATUS="FAILED"
+        soft_fail "Whisper base.en model download failed. Install manually:
+    mkdir -p ~/.whisper && curl -fL \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
+        return
+    fi
+
+    local _size
+    if [ "$(uname -s)" = "Darwin" ]; then
+        _size=$(stat -f%z "$MODEL_FILE" 2>/dev/null || echo 0)
+    else
+        _size=$(stat -c%s "$MODEL_FILE" 2>/dev/null || echo 0)
+    fi
+
+    if [ "$_size" -lt "$MIN_SIZE" ]; then
+        rm -f "$MODEL_FILE"
+        WHISPER_MODEL_STATUS="FAILED"
+        soft_fail "Whisper base.en model truncated ($_size bytes < $MIN_SIZE byte floor). Removed partial file. Re-run installer or fetch manually:
+    mkdir -p ~/.whisper && curl -fL \"$MODEL_URL\" -o ~/.whisper/ggml-base.en.bin"
+        return
+    fi
+
+    WHISPER_MODEL_STATUS="DOWNLOADED"
+    success "Whisper base.en model installed (~$((_size / 1024 / 1024))MB at $MODEL_FILE)"
+}
+
+# -----------------------------------------------------------------------------
 # Install FFmpeg (needed for video processing features)
 # -----------------------------------------------------------------------------
 install_ffmpeg() {
@@ -389,6 +494,17 @@ run_self_test() {
         TEST_FAIL=$((TEST_FAIL + 1))
     fi
 
+    if [ -f "$HOME/.whisper/ggml-base.en.bin" ] && [ -s "$HOME/.whisper/ggml-base.en.bin" ]; then
+        success "TEST: Whisper base.en model present (status: $WHISPER_MODEL_STATUS)"
+        TEST_PASS=$((TEST_PASS + 1))
+    elif [ "$NO_WHISPER_MODEL" = "1" ]; then
+        success "TEST: Whisper base.en model skipped (--no-whisper-model)"
+        TEST_PASS=$((TEST_PASS + 1))
+    else
+        soft_fail "TEST: Whisper base.en model not found at ~/.whisper/ggml-base.en.bin"
+        TEST_FAIL=$((TEST_FAIL + 1))
+    fi
+
     if command -v ffmpeg &>/dev/null; then
         success "TEST: FFmpeg available"
         TEST_PASS=$((TEST_PASS + 1))
@@ -440,6 +556,8 @@ print_summary() {
     echo "  coffee-shop launch video,' paste an IG Reel URL for a transcript,"
     echo "  or start a new Remotion project."
     echo ""
+    echo "  Whisper base.en model: $WHISPER_MODEL_STATUS  (~/.whisper/ggml-base.en.bin)"
+    echo ""
     if [ "$ERRORS" -gt 0 ]; then
         echo -e "  ${YELLOW}Warnings: $ERRORS issue(s) detected.${NC}"
         echo -e "  ${YELLOW}Scroll up to see details.${NC}"
@@ -462,6 +580,7 @@ main() {
 
     detect_os
     verify_prerequisites
+    preflight_npm_cache_ownership
     install_remotion_skills
     install_higgsfield_skills
     install_youtube_transcript
@@ -469,6 +588,7 @@ main() {
     install_ytdlp_mcp
     install_whisper_cpp
     install_whisper_mcp
+    install_whisper_model_basen
     install_ffmpeg
     run_self_test
     print_summary

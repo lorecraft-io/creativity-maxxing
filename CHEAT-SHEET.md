@@ -89,7 +89,13 @@ Generate and save Excalidraw diagrams conversationally. OAuth once.
 
 ### Gamma MCP
 
-Generate presentations, docs, and landing pages from a prompt. OAuth once.
+Generate presentations, docs, and landing pages from a prompt.
+
+> **Opt-in.** The default install skips Gamma because it fails to connect without an API key. To enable: re-run the installer with `--with-gamma` and grab a key from [gamma.app/api](https://gamma.app/api).
+>
+> ```bash
+> bash install.sh --with-gamma
+> ```
 
 ```
 "Generate a presentation about the creativity-maxxing install stack."

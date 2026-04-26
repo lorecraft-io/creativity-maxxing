@@ -14,6 +14,15 @@ NC='\033[0m'
 
 ERRORS=0
 
+# Opt-in flags. Parse ARGV before main() runs.
+WITH_GAMMA=0
+for _arg in "$@"; do
+    case "$_arg" in
+        --with-gamma) WITH_GAMMA=1 ;;
+        *) ;;
+    esac
+done
+
 info()    { echo -e "${BLUE}[INFO]${NC} $1"; }
 success() { echo -e "${GREEN}[OK]${NC} $1"; }
 warn()    { echo -e "${YELLOW}[WARN]${NC} $1"; }
@@ -44,6 +53,21 @@ verify_prerequisites() {
         fail "Claude Code not found. Install cli-maxxing first."
     fi
     success "Prerequisites verified"
+}
+
+# -----------------------------------------------------------------------------
+# Preflight: detect root-owned ~/.npm files (legacy `sudo npm install` damage)
+# Cross-repo consistent wording with 2ndBrain-mogging — every install on a
+# poisoned cache fails the same way and prints the same fix. Fail-loud, no
+# silent retries (npx swallows the EACCES and Magic / obsidian-mcp end up
+# half-installed without the user knowing).
+# -----------------------------------------------------------------------------
+preflight_npm_cache_ownership() {
+    if find "$HOME/.npm" -maxdepth 2 -user root -print -quit 2>/dev/null | grep -q .; then
+        fail "Root-owned files detected in ~/.npm — npx will fail silently. Fix:
+    sudo chown -R \$(whoami) ~/.npm
+Then re-run this installer."
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -163,9 +187,9 @@ install_21st_magic() {
         warn "Could not auto-configure Magic MCP. You may need to set it up manually."
         echo ""
         echo "  To set up manually:"
-        echo "  1. Go to https://21st.dev"
-        echo "  2. Create a free account"
-        echo "  3. Follow the MCP setup instructions on their site"
+        echo "  1. Go to https://21st.dev/mcp  (the MCP dashboard, not the homepage)"
+        echo "  2. Create a free account and copy your API key"
+        echo "  3. Follow the MCP setup instructions on the MCP page"
         echo ""
     fi
 }
@@ -319,11 +343,16 @@ run_self_test() {
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
-    if claude mcp list 2>/dev/null | grep -qE '^gamma:' 2>/dev/null; then
-        success "TEST: Gamma MCP configured"
-        TEST_PASS=$((TEST_PASS + 1))
+    if [ "$WITH_GAMMA" = "1" ]; then
+        if claude mcp list 2>/dev/null | grep -qE '^gamma:' 2>/dev/null; then
+            success "TEST: Gamma MCP configured"
+            TEST_PASS=$((TEST_PASS + 1))
+        else
+            warn "TEST: Gamma MCP may need manual setup"
+            TEST_PASS=$((TEST_PASS + 1))
+        fi
     else
-        warn "TEST: Gamma MCP may need manual setup"
+        success "TEST: Gamma MCP skipped (opt-in via --with-gamma)"
         TEST_PASS=$((TEST_PASS + 1))
     fi
 
@@ -368,7 +397,11 @@ print_summary() {
     echo "    Canva MCP        $(claude mcp list 2>/dev/null | grep -qE '^canva:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
     echo "    Figma MCP        $(claude mcp list 2>/dev/null | grep -qE '^figma:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
     echo "    Excalidraw MCP   $(claude mcp list 2>/dev/null | grep -qE '^excalidraw:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
-    echo "    Gamma MCP        $(claude mcp list 2>/dev/null | grep -qE '^gamma:' && echo 'configured (OAuth on first call)' || echo 'needs manual setup')"
+    if [ "$WITH_GAMMA" = "1" ]; then
+        echo "    Gamma MCP        $(claude mcp list 2>/dev/null | grep -qE '^gamma:' && echo 'configured (needs API key from gamma.app/api)' || echo 'needs manual setup')"
+    else
+        echo "    Gamma MCP        opt-in (re-run with --with-gamma + API key from gamma.app/api)"
+    fi
     echo "    Playwright MCP   $(claude mcp list 2>/dev/null | grep -qE '^playwright:' && echo 'configured' || echo '—')"
     echo ""
     echo "  Taste Skill variants (installed names / slash commands):"
@@ -397,20 +430,32 @@ print_summary() {
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
     echo "  21st.dev Magic — if auto-config missed, grab a free API key:"
-    echo "    1. Go to https://21st.dev"
-    echo "    2. Create a free account"
-    echo "    3. Follow the MCP setup one-liner on their site"
+    echo "    1. Go to https://21st.dev/mcp  (the MCP dashboard, not the homepage)"
+    echo "    2. Create a free account and copy your API key"
+    echo "    3. Follow the MCP setup one-liner on the MCP page"
     echo ""
     echo "  Canva MCP — OAuth on first use:"
     echo "    1. Ask Claude to list Canva designs (or use any Canva tool)"
     echo "    2. Claude opens a browser window — approve Canva access"
     echo "    3. Done. Subsequent calls are seamless."
     echo ""
-    echo "  Figma / Excalidraw / Gamma MCPs — OAuth on first use:"
+    echo "  Figma / Excalidraw MCPs — OAuth on first use:"
     echo "    Each one opens your browser the first time you call a tool."
-    echo "    Sign in with your existing account (Figma, Excalidraw.com, Gamma)"
+    echo "    Sign in with your existing account (Figma, Excalidraw.com)"
     echo "    and approve access — subsequent calls are seamless."
     echo ""
+    if [ "$WITH_GAMMA" = "1" ]; then
+        echo "  Gamma MCP — needs an API key:"
+        echo "    1. Grab a key from https://gamma.app/api"
+        echo "    2. Configure it via the Gamma MCP's auth flow on first call"
+        echo ""
+    else
+        echo "  Gamma MCP — opt-in (skipped this run):"
+        echo "    Default install does NOT register Gamma (it fails to connect"
+        echo "    without an API key). To enable, grab a key from"
+        echo "    https://gamma.app/api and re-run the installer with --with-gamma."
+        echo ""
+    fi
     echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 }
@@ -422,19 +467,29 @@ main() {
     echo ""
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo -e "${BLUE}  Design Module${NC}"
-    echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva + Figma + Excalidraw + Gamma + Playwright${NC}"
+    if [ "$WITH_GAMMA" = "1" ]; then
+        echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva + Figma + Excalidraw + Gamma + Playwright${NC}"
+    else
+        echo -e "${BLUE}  UI/UX Pro Max + Taste Skills + Magic + Canva + Figma + Excalidraw + Playwright${NC}"
+        echo -e "${BLUE}  (Gamma opt-in via --with-gamma)${NC}"
+    fi
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
     detect_os
     verify_prerequisites
+    preflight_npm_cache_ownership
     install_uiux_skill
     install_taste_skill
     install_21st_magic
     install_canva_mcp
     install_figma_mcp
     install_excalidraw_mcp
-    install_gamma_mcp
+    if [ "$WITH_GAMMA" = "1" ]; then
+        install_gamma_mcp
+    else
+        info "Gamma MCP skipped (opt-in via --with-gamma; needs API key from gamma.app/api)"
+    fi
     install_playwright
     run_self_test
     print_summary

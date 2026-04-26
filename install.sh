@@ -6,7 +6,8 @@ set -euo pipefail
 # Installs the design + media modules.
 #
 # Design module:  UI/UX Pro Max skill · 8× Taste Skills · 21st.dev Magic MCP
-#                 Canva MCP · Figma MCP · Excalidraw MCP · Gamma MCP · Playwright MCP
+#                 Canva MCP · Figma MCP · Excalidraw MCP · Playwright MCP
+#                 Gamma MCP (opt-in via --with-gamma)
 # Media module:   Remotion skill · 15× Higgsfield/Seedance skills
 #                 YouTube Transcript MCP · yt-dlp (CLI + MCP) · whisper-cpp
 #                 whisper-mcp · FFmpeg
@@ -26,7 +27,8 @@ echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo "  Design module:"
 echo "    UI/UX Pro Max skill · 8× Taste Skills · 21st.dev Magic MCP"
-echo "    Canva MCP · Figma MCP · Excalidraw MCP · Gamma MCP · Playwright MCP"
+echo "    Canva MCP · Figma MCP · Excalidraw MCP · Playwright MCP"
+echo "    Gamma MCP (opt-in via --with-gamma; needs API key)"
 echo ""
 echo "  Media module:"
 echo "    Remotion skill · 15× Higgsfield/Seedance skills"
@@ -56,8 +58,8 @@ if [ ! -f "$HERE/design/install.sh" ]; then
     HERE="$_TMPDIR"
 fi
 
-bash "$HERE/design/install.sh"
-bash "$HERE/media/install.sh"
+bash "$HERE/design/install.sh" "$@"
+bash "$HERE/media/install.sh" "$@"
 touch "$MARKER"
 
 echo ""
@@ -70,14 +72,19 @@ echo -e "${YELLOW}  Manual follow-ups required for 5 tools:${NC}"
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 echo "  21st.dev Magic — free API key required:"
-echo "    1. Go to https://21st.dev"
-echo "    2. Create a free account and get your API key"
-echo "    3. Run the setup one-liner shown on their site"
+echo "    1. Go to https://21st.dev/mcp  (the MCP dashboard, not the homepage)"
+echo "    2. Create a free account and copy your API key"
+echo "    3. Run the setup one-liner shown on the MCP page"
 echo ""
-echo "  Canva, Figma, Excalidraw, Gamma — OAuth on first use:"
+echo "  Canva, Figma, Excalidraw — OAuth on first use:"
 echo "    No setup needed now. The first time you ask Claude to use"
 echo "    one of these tools, a browser window opens for sign-in."
 echo "    Approve access once — subsequent calls are seamless."
+echo ""
+echo "  Gamma — opt-in (requires API key):"
+echo "    Default install does NOT register Gamma (it fails to connect"
+echo "    without a key). To enable, grab a key from https://gamma.app/api"
+echo "    and re-run the installer with --with-gamma."
 echo ""
 echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""

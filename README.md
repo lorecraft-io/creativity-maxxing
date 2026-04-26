@@ -82,7 +82,17 @@ cd creativity-maxxing
 bash install.sh
 ```
 
+Want Gamma too? It's opt-in (it fails to connect without an API key from [gamma.app/api](https://gamma.app/api)):
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/lorecraft-io/creativity-maxxing/main/install.sh) --with-gamma
+```
+
 The installer runs `design/install.sh` then `media/install.sh` in order, refuses to start if `claude` or `~/.claude/skills/` is missing, and is idempotent — re-run any time without duplicating installs. Idempotency marker: `~/.claude/.creativity-maxxing-installed` (delete to force a full reinstall).
+
+**Flags:**
+- `--with-gamma` — also register the Gamma MCP (default off, needs API key).
+- `--no-whisper-model` — skip the auto-fetch of the Whisper `base.en` model (~141MB). Default behavior downloads it so transcription works on first call.
 
 ### Manual steps (OAuth / accounts)
 
@@ -90,11 +100,11 @@ A few of the tools need an extra click after the installer runs. The script prin
 
 | Tool | What you need to do |
 |------|--------------------|
-| **21st.dev Magic MCP** | Sign up free at [21st.dev](https://21st.dev), grab your API key, follow their MCP setup one-liner |
+| **21st.dev Magic MCP** | Sign up free at [21st.dev/mcp](https://21st.dev/mcp) (the MCP dashboard, not the homepage), grab your API key, follow the setup one-liner |
 | **Canva MCP** | First time you call it, Claude opens a browser for Canva OAuth — allow, done |
 | **Figma MCP** | First call opens browser for Figma OAuth — sign in with your Figma account, allow, done |
 | **Excalidraw MCP** | First call opens browser for Excalidraw OAuth — sign in, allow, done |
-| **Gamma MCP** | First call opens browser for Gamma OAuth — sign in with your Gamma account, allow, done |
+| **Gamma MCP** | **Opt-in.** Default install skips Gamma (it fails to connect without a key). Re-run install with `--with-gamma` and grab a key from [gamma.app/api](https://gamma.app/api) |
 | **Morgen / Notion / Motion** | Not in this repo — those live in `cli-maxxing` |
 
 Everything else installs with zero accounts and zero keys.
@@ -119,10 +129,11 @@ Everything else installs with zero accounts and zero keys.
 | ffmpeg | Homebrew | Video/audio glue (shared — prompted before uninstall) |
 | Figma | MCP server (HTTP, OAuth) | Read Figma files, inspect frames, export design tokens, convert designs to code. Paste any figma.com URL and it resolves. |
 | Excalidraw | MCP server (HTTP, OAuth) | Generate + edit Excalidraw diagrams conversationally. "Draw the architecture" → actual `.excalidraw` file. |
-| Gamma | MCP server (HTTP, OAuth) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. |
+| Gamma | MCP server (opt-in via `--with-gamma`, needs API key) | Generate presentations, docs, and landing pages from a prompt. Pairs well with `UI/UX Pro Max` context. Default install skips it (no key = silent connect failure). |
 | Playwright MCP | MCP server | Microsoft's official browser automation — lets Claude log into and operate web apps with no API (Higgsfield, niche SaaS, anything you'd normally click through). |
+| Whisper `base.en` model | ~141MB binary at `~/.whisper/ggml-base.en.bin` | Auto-fetched from huggingface.co so transcription works on first call. Skip with `--no-whisper-model`. |
 
-All targets are **idempotent** — the install script checks and skips if already present. Figma, Excalidraw, Gamma (and Canva above) install as remote HTTP MCPs — the script registers them; first tool call opens your browser for a one-time OAuth. Playwright installs as a local npx MCP — no credentials needed.
+All targets are **idempotent** — the install script checks and skips if already present. Figma, Excalidraw (and Canva above) install as remote HTTP MCPs — the script registers them; first tool call opens your browser for a one-time OAuth. Gamma is opt-in (`--with-gamma`) and requires an API key from [gamma.app/api](https://gamma.app/api). Playwright installs as a local npx MCP — no credentials needed.
 
 ---
 
