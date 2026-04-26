@@ -69,6 +69,26 @@ assert_contains "$DESIGN_SH" "install_gamma_mcp" \
 assert_contains "$DESIGN_SH" "mcp.gamma.app" \
   "Gamma remote MCP URL present"
 
+# Gamma must be gated behind WITH_GAMMA opt-in (item 13 from WAGMI Apr-22 install
+# bug catalog: Gamma fails to connect without an API key, so default-on installs
+# present users with an MCP that's broken on first use).
+assert_contains "$DESIGN_SH" "WITH_GAMMA" \
+  "WITH_GAMMA opt-in flag declared"
+assert_contains "$DESIGN_SH" "--with-gamma" \
+  "--with-gamma CLI flag parsed"
+assert_contains "$DESIGN_SH" 're:if \[ "\$WITH_GAMMA" = "1" \]' \
+  "main() gates install_gamma_mcp on WITH_GAMMA"
+
+# Item 12 — root-owned ~/.npm preflight (cross-repo consistency w/ 2ndBrain-mogging).
+assert_contains "$DESIGN_SH" "preflight_npm_cache_ownership" \
+  "preflight_npm_cache_ownership function defined"
+assert_contains "$DESIGN_SH" "sudo chown -R" \
+  "preflight prints the chown fix users need to run"
+
+# Item 3 — 21st.dev URL must point at the MCP dashboard, not the homepage.
+assert_contains "$DESIGN_SH" "21st.dev/mcp" \
+  "21st.dev MCP dashboard URL referenced (not the homepage)"
+
 # -- Playwright (newest addition — this is the must-cover item per the audit)
 assert_contains "$DESIGN_SH" "install_playwright" \
   "install_playwright function defined (Playwright MCP — newest)"
